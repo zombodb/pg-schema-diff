@@ -66,6 +66,7 @@ pub trait SqlIdent {
 }
 
 pub trait SqlCollect {
+    fn sql_wrap(self, pre: &str, post: &str) -> String;
     fn sql(self) -> String;
 }
 

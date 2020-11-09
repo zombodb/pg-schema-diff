@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql, SqlCollect};
+use crate::schema_set::{Diff, Sql, SqlCollect, SqlList};
 use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::nodes::CreateFunctionStmt;
 
@@ -50,9 +50,19 @@ impl Sql for CreateFunctionStmt {
         let mut returns_table = false;
         let mut sql = String::new();
 
-        sql.push_str("CREATE FUNCTION ");
+        if self.replace {
+            sql.push_str("CREATE OR REPLACE ");
+        } else {
+            sql.push_str("CREATE ");
+        }
+
+        if self.is_procedure {
+            sql.push_str("PROCEDURE ");
+        } else {
+            sql.push_str("FUNCTION ");
+        }
+
         sql.push_str(&make_name(&self.funcname).expect("no 'funcname' for CreateFunctionStmt"));
-        sql.push('(');
         sql.push_str(
             &self
                 .parameters
@@ -67,14 +77,12 @@ impl Sql for CreateFunctionStmt {
                     }
                     _ => false,
                 })
-                .sql(),
+                .sql_wrap("(", ")"),
         );
-        sql.push(')');
 
         if returns_table {
             sql.push_str(" RETURNS TABLE");
 
-            sql.push('(');
             sql.push_str(
                 &self
                     .parameters
@@ -84,22 +92,13 @@ impl Sql for CreateFunctionStmt {
                     .filter(|p|
                         matches!(p, Node::FunctionParameter(param) if param.mode == FUNC_PARAM_TABLE)
                     )
-                    .sql(),
+                    .sql_wrap("(", ")"),
             );
-            sql.push(')');
         } else {
-            sql.push_str(&format!(
-                " RETURNS {}",
-                self.returnType.as_ref().expect("no return type").sql()
-            ));
+            sql.push_str(&self.returnType.sql_prefix(" RETURNS "));
         }
 
-        for opt in self.options.as_ref().unwrap_or(&EMPTY_NODE_VEC) {
-            sql.push(' ');
-            sql.push_str(&opt.sql());
-        }
-
-        sql.push_str(";");
+        sql.push_str(&self.options.sql(" "));
 
         sql
     }
