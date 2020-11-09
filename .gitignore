@@ -1,0 +1,6 @@
+/target
+/a.sql
+/b.sql
+/foo.sql
+.idea/
+.*.swp
