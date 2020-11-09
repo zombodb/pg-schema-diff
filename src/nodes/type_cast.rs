@@ -1,6 +1,5 @@
 use crate::schema_set::Sql;
 use postgres_parser::nodes::TypeCast;
-use postgres_parser::Node;
 
 impl Sql for TypeCast {
     fn sql(&self) -> String {

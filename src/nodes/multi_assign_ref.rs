@@ -19,7 +19,7 @@ impl Sql for MultiAssignRef {
                 ),
             },
         }
-        if let Some(vec) = self.source.as_ref() {
+        if let Some(_vec) = self.source.as_ref() {
             // sql.push_str(&vec[self.colno as usize].sql());
         }
 

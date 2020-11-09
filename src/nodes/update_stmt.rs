@@ -4,7 +4,7 @@ use postgres_parser::nodes::UpdateStmt;
 use postgres_parser::Node;
 
 impl Diff for UpdateStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
+    fn alter(&self, _other: &Node) -> Option<String> {
         unimplemented!()
     }
 

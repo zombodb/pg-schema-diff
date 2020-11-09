@@ -78,7 +78,7 @@ impl Sql for Node {
             Node::OnConflictClause(stmt) => stmt.sql(),
             Node::RangeSubselect(stmt) => stmt.sql(),
             Node::RangeVar(stmt) => stmt.sql(),
-            Node::ResTarget(stmt) => unreachable!("encountered a ResTarget node"),
+            Node::ResTarget(_stmt) => unreachable!("encountered a ResTarget node"),
             Node::RowExpr(stmt) => stmt.sql(),
             Node::SelectStmt(stmt) => stmt.sql(),
             Node::SetToDefault(stmt) => stmt.sql(),

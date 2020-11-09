@@ -1,6 +1,5 @@
 use crate::schema_set::{Sql, SqlIdent};
 use postgres_parser::nodes::RangeVar;
-use postgres_parser::quote_identifier;
 
 impl Sql for RangeVar {
     fn sql(&self) -> String {

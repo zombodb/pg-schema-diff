@@ -1,5 +1,5 @@
 use crate::schema_set::{Diff, Sql, SqlList};
-use crate::EMPTY_NODE_VEC;
+
 use postgres_parser::nodes::CreateStmt;
 use postgres_parser::Node;
 

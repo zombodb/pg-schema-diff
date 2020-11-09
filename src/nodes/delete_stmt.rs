@@ -4,7 +4,7 @@ use postgres_parser::nodes::DeleteStmt;
 use postgres_parser::Node;
 
 impl Diff for DeleteStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
+    fn alter(&self, _other: &Node) -> Option<String> {
         unimplemented!()
     }
 

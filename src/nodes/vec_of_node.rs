@@ -1,8 +1,6 @@
 use crate::schema_set::{Sql, SqlCollect, SqlList};
-use crate::EMPTY_NODE_VEC;
+
 use postgres_parser::Node;
-use std::iter::FromIterator;
-use std::str::FromStr;
 
 impl Sql for Vec<Node> {
     fn sql(&self) -> String {

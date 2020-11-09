@@ -1,5 +1,5 @@
+use crate::make_name;
 use crate::schema_set::{Sql, SqlList};
-use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::nodes::FuncCall;
 
 impl Sql for FuncCall {

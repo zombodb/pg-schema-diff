@@ -1,7 +1,7 @@
 use crate::schema_set::{Diff, Sql, SqlCollect};
 use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::nodes::CreateFunctionStmt;
-use postgres_parser::sys::FunctionParameterMode;
+
 use postgres_parser::sys::FunctionParameterMode::FUNC_PARAM_TABLE;
 use postgres_parser::Node;
 

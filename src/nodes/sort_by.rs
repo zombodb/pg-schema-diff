@@ -1,5 +1,5 @@
+use crate::make_operator_name;
 use crate::schema_set::Sql;
-use crate::{make_name, make_operator_name};
 use postgres_parser::nodes::SortBy;
 use postgres_parser::sys::SortByDir;
 

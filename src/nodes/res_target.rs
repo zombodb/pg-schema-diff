@@ -1,6 +1,6 @@
 use crate::schema_set::{Sql, SqlIdent, SqlList};
 use crate::EMPTY_NODE_VEC;
-use postgres_parser::nodes::ResTarget;
+
 use postgres_parser::Node;
 
 pub fn res_target_select(targets: &Option<Vec<Node>>) -> String {
@@ -70,7 +70,9 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
         });
 
     let mut i = 0;
-    while let mut current = iter.next() {
+    loop {
+        let mut current = iter.next();
+
         if current.is_none() {
             break;
         }

@@ -1,7 +1,6 @@
 use crate::schema_set::Sql;
 use postgres_parser::nodes::Constraint;
 use postgres_parser::sys::ConstrType;
-use postgres_parser::Node;
 
 impl Sql for Constraint {
     fn sql(&self) -> String {

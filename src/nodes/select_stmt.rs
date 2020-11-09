@@ -1,11 +1,11 @@
 use crate::nodes::res_target::res_target_select;
 use crate::schema_set::{Diff, Sql, SqlList};
-use crate::EMPTY_NODE_VEC;
+
 use postgres_parser::nodes::SelectStmt;
 use postgres_parser::Node;
 
 impl Diff for SelectStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
+    fn alter(&self, _other: &Node) -> Option<String> {
         unimplemented!()
     }
 

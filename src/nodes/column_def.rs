@@ -1,7 +1,6 @@
 use crate::schema_set::{Sql, SqlIdent};
 use crate::EMPTY_NODE_VEC;
 use postgres_parser::nodes::ColumnDef;
-use postgres_parser::Node;
 
 impl Sql for ColumnDef {
     fn sql(&self) -> String {

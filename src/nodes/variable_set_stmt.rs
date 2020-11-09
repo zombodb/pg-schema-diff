@@ -1,6 +1,5 @@
 use crate::schema_set::{Sql, SqlList};
 use postgres_parser::nodes::VariableSetStmt;
-use postgres_parser::Node;
 
 impl Sql for VariableSetStmt {
     fn sql(&self) -> String {

@@ -1,5 +1,5 @@
 use crate::schema_set::{Sql, SqlList};
-use crate::EMPTY_NODE_VEC;
+
 use postgres_parser::nodes::A_Indirection;
 
 impl Sql for A_Indirection {

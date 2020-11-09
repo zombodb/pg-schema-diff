@@ -1,5 +1,5 @@
 use crate::make_operator_name;
-use crate::schema_set::{Sql, SqlList};
+use crate::schema_set::Sql;
 use postgres_parser::nodes::SubLink;
 use postgres_parser::sys::SubLinkType;
 

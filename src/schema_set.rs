@@ -1,10 +1,8 @@
 use crate::EMPTY_NODE_VEC;
 use postgres_parser::{quote_identifier, Node, SqlStatementScanner};
-use std::borrow::Borrow;
+
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
-use std::iter::FromIterator;
-use std::str::FromStr;
 
 pub struct DiffableStatement {
     sql: String,
@@ -176,6 +174,7 @@ impl SchemaSet {
         sql
     }
 
+    #[allow(dead_code)]
     pub fn diff(self, other: &mut SchemaSet) -> String {
         let mut sql = String::new();
 

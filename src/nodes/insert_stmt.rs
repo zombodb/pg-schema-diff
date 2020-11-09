@@ -1,11 +1,10 @@
-use crate::make_name;
 use crate::nodes::res_target::{res_target_insert, res_target_returning};
-use crate::schema_set::{Diff, Sql, SqlList};
+use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::InsertStmt;
 use postgres_parser::Node;
 
 impl Diff for InsertStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
+    fn alter(&self, _other: &Node) -> Option<String> {
         unimplemented!()
     }
 

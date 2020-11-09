@@ -1,5 +1,5 @@
-use crate::schema_set::{Len, Sql, SqlList};
-use crate::{make_name, make_operator_name};
+use crate::make_operator_name;
+use crate::schema_set::Sql;
 use postgres_parser::nodes::A_Expr;
 use postgres_parser::sys::A_Expr_Kind;
 use postgres_parser::Node;
