@@ -7,6 +7,10 @@ impl SqlIdent for ColumnRef {
         make_name(&self.fields).expect("unable to make 'fields' for ColumnRef")
     }
 
+    fn sql_prefix(&self, pre: &str) -> String {
+        format!("{}{}", pre, self.sql())
+    }
+
     fn sql_suffix(&self, suf: &str) -> String {
         format!("{}{}", self.sql(), suf)
     }

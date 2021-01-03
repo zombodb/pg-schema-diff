@@ -1,5 +1,5 @@
 use crate::schema_set::Sql;
-use crate::{get_bool_value, get_float_value, get_int_value, get_string_value};
+use crate::{get_bool_value, get_string_value};
 use postgres_parser::nodes::DefElem;
 use postgres_parser::Node;
 
@@ -10,21 +10,19 @@ impl Sql for DefElem {
         let defname = self.defname.as_ref().unwrap();
 
         match defname.as_str() {
+            "cache" => sql.push_str(&format!("CACHE {}", self.arg.sql())),
+            "cycle" => {
+                if get_bool_value(&self.arg.as_ref().unwrap()) {
+                    sql.push_str("CYCLE");
+                } else {
+                    sql.push_str("NO CYCLE");
+                }
+            }
             "language" => {
-                sql.push_str(&format!(
-                    "LANGUAGE {}",
-                    get_string_value(&self.arg.as_ref().unwrap())
-                        .as_ref()
-                        .expect("no string value for 'language'")
-                ));
+                sql.push_str(&format!("LANGUAGE {}", self.arg.sql()));
             }
             "volatility" => {
-                sql.push_str(&format!(
-                    "{}",
-                    get_string_value(&self.arg.as_ref().unwrap())
-                        .as_ref()
-                        .expect("no string value for 'volatility'")
-                ));
+                sql.push_str(&self.arg.sql());
             }
             "strict" => {
                 if get_bool_value(&self.arg.as_ref().unwrap()) {
@@ -32,34 +30,14 @@ impl Sql for DefElem {
                 }
             }
             "set" => {
-                sql.push_str(&format!(
-                    "SET {}",
-                    self.arg
-                        .as_ref()
-                        .expect("no 'arg' for DefElement SET")
-                        .as_ref()
-                        .sql()
-                ));
+                sql.push_str(&format!("SET {}", self.arg.sql()));
             }
-            "parallel" => sql.push_str(&format!(
-                "PARALLEL {}",
-                get_string_value(&self.arg.as_ref().unwrap())
-                    .as_ref()
-                    .expect("no value for 'parallel")
-            )),
-            "cost" => sql.push_str(&format!(
-                "COST {}",
-                get_float_value(&self.arg.as_ref().unwrap())
-                    .as_ref()
-                    .expect("no value for 'cost'")
-            )),
-            "rows" => sql.push_str(&format!(
-                "ROWS {}",
-                get_int_value(&self.arg.as_ref().unwrap())
-                    .as_ref()
-                    .expect("no value for 'rows'")
-            )),
+            "parallel" => sql.push_str(&format!("PARALLEL {}", self.arg.sql())),
+            "cost" => sql.push_str(&format!("COST {}", self.arg.sql())),
+            "rows" => sql.push_str(&format!("ROWS {}", self.arg.sql())),
+            "start" => sql.push_str(&format!("START WITH {}", &self.arg.sql())),
             "as" => {
+                // sql.push_str(&format!("AS {}", self.arg.sql()));
                 if let Node::List(list) = self.arg.as_ref().unwrap().as_ref() {
                     sql.push_str("AS ");
                     sql.push_str(

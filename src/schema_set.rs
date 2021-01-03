@@ -45,16 +45,18 @@ pub trait Sql {
     fn sql_prefix(&self, pre: &str) -> String {
         format!("{}{}", pre, self.sql())
     }
-
     fn sql_wrap(&self, pre: &str, post: &str) -> String {
         format!("{}{}{}", pre, self.sql(), post)
     }
-
+    fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str) -> String {
+        format!("{}{}{}{}", pre, start, self.sql(), end)
+    }
     fn sql(&self) -> String;
 }
 
 pub trait SqlList {
     fn sql_prefix(&self, pre: &str, sep: &str) -> String;
+    fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str, sep: &str) -> String;
     fn sql(&self, sep: &str) -> String;
     fn sql_wrap_each(&self, pre: Option<&str>, post: Option<&str>) -> String;
     fn sql_wrap(&self, pre: Option<&str>, post: Option<&str>) -> String;
@@ -62,6 +64,7 @@ pub trait SqlList {
 
 pub trait SqlIdent {
     fn sql(&self) -> String;
+    fn sql_prefix(&self, pre: &str) -> String;
     fn sql_suffix(&self, suf: &str) -> String;
 }
 
@@ -78,6 +81,13 @@ impl<T: Sql> Sql for Option<Box<T>> {
         }
     }
 
+    fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(boxed_sql) => format!("{}{}{}{}", pre, start, boxed_sql.sql(), end),
+        }
+    }
+
     fn sql(&self) -> String {
         match self {
             None => String::new(),
@@ -89,6 +99,13 @@ impl<T: Sql> Sql for Option<Box<T>> {
 impl SqlIdent for Option<String> {
     fn sql(&self) -> String {
         quote_identifier(self)
+    }
+
+    fn sql_prefix(&self, pre: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}", pre, self.sql()),
+        }
     }
 
     fn sql_suffix(&self, suf: &str) -> String {

@@ -16,6 +16,13 @@ impl SqlList for Option<Vec<Node>> {
         }
     }
 
+    fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str, sep: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}{}{}", pre, start, self.sql(sep), end),
+        }
+    }
+
     fn sql(&self, sep: &str) -> String {
         match self {
             None => String::new(),

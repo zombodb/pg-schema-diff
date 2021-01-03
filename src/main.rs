@@ -24,6 +24,20 @@ fn main() {
     println!("{}", deparse);
 }
 
+pub fn make_individual_names(names: &Option<Vec<Node>>) -> Vec<String> {
+    let mut result = Vec::new();
+
+    if names.is_some() {
+        for name in names.as_ref().unwrap() {
+            result.push(
+                make_name(&Some(vec![name.clone()])).expect("failed to make an individual name"),
+            );
+        }
+    }
+
+    result
+}
+
 pub fn make_name(names: &Option<Vec<Node>>) -> Result<String, PgParserError> {
     match names {
         Some(names) => {
