@@ -222,6 +222,8 @@ dependencies = [
 [[package]]
 name = "postgres-parser"
 version = "0.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46623d241ddd3e0113ff6794eb24d4f4eb70493b268907521eb8b5abcd965dcc"
 dependencies = [
  "bindgen",
  "lazy_static",
