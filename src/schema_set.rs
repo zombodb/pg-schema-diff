@@ -1,5 +1,5 @@
 use crate::{make_name, EMPTY_NODE_VEC};
-use postgres_parser::{quote_identifier, Node, SqlStatementScanner};
+use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
@@ -230,8 +230,21 @@ impl SchemaSet {
         let mut sql = String::new();
 
         for node in &self.nodes {
+            let deparsed = node.node.sql();
+            let reparsed = parse_query(&deparsed)
+                .unwrap_or_else(|e| panic!("FAILED TO PARSE:\n{:?}\n{}", e, deparsed));
+            if &node.node != reparsed.get(0).expect("didn't parse anything") {
+                panic!(
+                    "FAILED TO REPARSE:{:?};\n{:?};\n\n\nORIG:\n   {}\nNEW:\n   {};\n",
+                    node.node,
+                    reparsed.get(0).unwrap(),
+                    node.sql,
+                    deparsed
+                );
+            }
+
             sql.push_str(&node.node.sql());
-            sql.push('\n');
+            sql.push_str(";\n");
         }
 
         sql
