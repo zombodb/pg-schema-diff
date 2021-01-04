@@ -30,7 +30,7 @@ impl Sql for DefElem {
                 }
             }
             "set" => {
-                sql.push_str(&format!("SET {}", self.arg.sql()));
+                sql.push_str(&self.arg.sql());
             }
             "parallel" => sql.push_str(&format!("PARALLEL {}", self.arg.sql())),
             "cost" => sql.push_str(&format!("COST {}", self.arg.sql())),

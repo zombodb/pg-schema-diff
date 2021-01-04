@@ -36,9 +36,15 @@ impl DiffableStatement {
 }
 
 pub trait Diff: Sql {
-    fn alter(&self, _other: &Node) -> Option<String>;
-    fn drop(&self) -> String;
-    fn name(&self, _sql: &str) -> String;
+    fn alter(&self, _other: &Node) -> Option<String> {
+        None
+    }
+    fn drop(&self) -> String {
+        unimplemented!()
+    }
+    fn name(&self, _sql: &str) -> String {
+        _sql.into()
+    }
 }
 
 pub trait Sql {
@@ -186,38 +192,46 @@ impl SchemaSet {
     }
 
     pub fn push(&mut self, sql: &str, node: Node) {
+        #[inline]
+        fn push(
+            nodes: &mut IndexSet<DiffableStatement>,
+            sql: &str,
+            node: Node,
+            differ: impl Diff + 'static,
+        ) {
+            nodes.insert(DiffableStatement::new(sql, node, differ));
+        }
+
         match node.clone() {
-            Node::CreateFunctionStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-
-            Node::CreateStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::DeleteStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::InsertStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::SelectStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::UpdateStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-
-            Node::DoStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::CreateSchemaStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-            Node::GrantStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::GrantRoleStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::CreateDomainStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-            Node::CreateEnumStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-            Node::DefineStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::CreateCastStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-            Node::CreateAmStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
-            Node::CreateOpClassStmt(stmt) => {
-                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
-            }
-            Node::ViewStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::CreateFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DeleteStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::InsertStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::SelectStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::UpdateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DoStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::GrantStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::GrantRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateDomainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateEnumStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DefineStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateCastStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateAmStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateOpClassStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ViewStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::VariableSetStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::VariableShowStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::TransactionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DiscardStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DeclareCursorStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::PrepareStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ListenStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DropRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DropStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ExplainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
 
             _ => panic!("unknown node: {:?}", node),
         };

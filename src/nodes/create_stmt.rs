@@ -21,7 +21,18 @@ impl Sql for CreateStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
-        sql.push_str("CREATE TABLE ");
+        let is_temp = self.relation.as_ref().unwrap().relpersistence == 't';
+
+        sql.push_str("CREATE ");
+        if is_temp {
+            sql.push_str("TEMPORARY ");
+        }
+        sql.push_str("TABLE ");
+
+        if self.if_not_exists {
+            sql.push_str("IF NOT EXISTS ");
+        }
+
         sql.push_str(
             &self
                 .relation
@@ -30,6 +41,7 @@ impl Sql for CreateStmt {
                 .sql(),
         );
         sql.push_str(&self.tableElts.sql_wrap(", ", "(", ")"));
+        sql.push_str(&self.oncommit.sql_prefix(" "));
 
         sql
     }
