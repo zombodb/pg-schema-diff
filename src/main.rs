@@ -9,19 +9,26 @@ static EMPTY_NODE_VEC: Vec<Node> = Vec::new();
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let a = args.get(1).expect("no a filename");
-    let b = args.get(2).expect("no b filename");
+    let b = args.get(2);
 
-    let mut a_set = SchemaSet::new();
-    let mut b_set = SchemaSet::new();
+    if b.is_none() {
+        let mut set = SchemaSet::new();
+        set.scan_file(&a);
+        println!("{}", set.deparse());
+    } else {
+        let b = b.unwrap();
+        let mut a_set = SchemaSet::new();
+        let mut b_set = SchemaSet::new();
 
-    a_set.scan_file(&a);
-    b_set.scan_file(&b);
+        a_set.scan_file(&a);
+        b_set.scan_file(&b);
 
-    // let diff = b_set.diff(&mut a_set);
-    // println!("{}", diff);
+        // let diff = b_set.diff(&mut a_set);
+        // println!("{}", diff);
 
-    let deparse = a_set.deparse();
-    println!("{}", deparse);
+        let differences = b_set.diff(&a_set);
+        println!("{}", differences);
+    }
 }
 
 pub fn make_individual_names(names: &Option<Vec<Node>>) -> Vec<String> {
@@ -49,7 +56,7 @@ pub fn make_name(names: &Option<Vec<Node>>) -> Result<String, PgParserError> {
 
                 match name {
                     crate::Node::Value(value) if value.string.is_some() => {
-                        result.push_str(&value.string.sql());
+                        result.push_str(&value.string.sql_ident());
                     }
                     crate::Node::A_Star(a_star) => {
                         result.push_str(&a_star.sql());
@@ -85,7 +92,7 @@ pub fn make_operator_name(names: &Option<Vec<Node>>) -> Result<String, PgParserE
                             // don't quote the operator itself
                             result.push_str(&value.string.as_ref().unwrap());
                         } else {
-                            result.push_str(&value.string.sql());
+                            result.push_str(&value.string.sql_ident());
                         }
                     }
                     crate::Node::A_Star(a_star) => {

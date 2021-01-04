@@ -6,7 +6,7 @@ impl Sql for Alias {
         let mut sql = String::new();
 
         sql.push_str(" AS ");
-        sql.push_str(&self.aliasname.sql());
+        sql.push_str(&self.aliasname.sql_ident());
 
         sql
     }

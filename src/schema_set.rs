@@ -1,4 +1,4 @@
-use crate::EMPTY_NODE_VEC;
+use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::{quote_identifier, Node, SqlStatementScanner};
 
 use std::collections::HashSet;
@@ -36,9 +36,9 @@ impl DiffableStatement {
 }
 
 pub trait Diff: Sql {
-    fn alter(&self, other: &Node) -> Option<String>;
+    fn alter(&self, _other: &Node) -> Option<String>;
     fn drop(&self) -> String;
-    fn name(&self, sql: &str) -> String;
+    fn name(&self, _sql: &str) -> String;
 }
 
 pub trait Sql {
@@ -63,9 +63,9 @@ pub trait SqlList {
 }
 
 pub trait SqlIdent {
-    fn sql(&self) -> String;
-    fn sql_prefix(&self, pre: &str) -> String;
-    fn sql_suffix(&self, suf: &str) -> String;
+    fn sql_ident(&self) -> String;
+    fn sql_ident_prefix(&self, pre: &str) -> String;
+    fn sql_ident_suffix(&self, suf: &str) -> String;
 }
 
 pub trait SqlCollect {
@@ -97,21 +97,44 @@ impl<T: Sql> Sql for Option<Box<T>> {
 }
 
 impl SqlIdent for Option<String> {
-    fn sql(&self) -> String {
+    fn sql_ident(&self) -> String {
         quote_identifier(self)
     }
 
-    fn sql_prefix(&self, pre: &str) -> String {
+    fn sql_ident_prefix(&self, pre: &str) -> String {
         match self {
             None => String::new(),
-            Some(_) => format!("{}{}", pre, self.sql()),
+            Some(_) => format!("{}{}", pre, self.sql_ident()),
         }
     }
 
-    fn sql_suffix(&self, suf: &str) -> String {
+    fn sql_ident_suffix(&self, suf: &str) -> String {
         match self {
             None => String::new(),
-            Some(_) => format!("{}{}", self.sql(), suf),
+            Some(_) => format!("{}{}", self.sql_ident(), suf),
+        }
+    }
+}
+
+impl SqlIdent for Option<Vec<Node>> {
+    #[track_caller]
+    fn sql_ident(&self) -> String {
+        make_name(self).expect("unable to make SqlIdent")
+    }
+
+    #[track_caller]
+    fn sql_ident_prefix(&self, pre: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}", pre, self.sql_ident()),
+        }
+    }
+
+    #[track_caller]
+    fn sql_ident_suffix(&self, suf: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}", self.sql_ident(), suf),
         }
     }
 }
@@ -155,7 +178,29 @@ impl SchemaSet {
             Node::SelectStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
             Node::UpdateStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
 
-            _ => false,
+            Node::DoStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::CreateSchemaStmt(stmt) => {
+                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
+            }
+            Node::GrantStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::GrantRoleStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::CreateDomainStmt(stmt) => {
+                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
+            }
+            Node::CreateEnumStmt(stmt) => {
+                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
+            }
+            Node::DefineStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::CreateCastStmt(stmt) => {
+                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
+            }
+            Node::CreateAmStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+            Node::CreateOpClassStmt(stmt) => {
+                self.nodes.insert(DiffableStatement::new(sql, node, stmt))
+            }
+            Node::ViewStmt(stmt) => self.nodes.insert(DiffableStatement::new(sql, node, stmt)),
+
+            _ => panic!("unknown node: {:?}", node),
         };
     }
 
@@ -193,26 +238,24 @@ impl SchemaSet {
     }
 
     #[allow(dead_code)]
-    pub fn diff(self, other: &mut SchemaSet) -> String {
+    pub fn diff(self, that: &SchemaSet) -> String {
         let mut sql = String::new();
 
-        for node in &self.nodes {
-            match other.nodes.get(&node) {
-                // it's in the other one too, so we need to diff it
-                Some(other_node) => {
-                    if node.node != other_node.node {
-                        if let Some(alter) = node.differ.alter(&other_node.node) {
+        for this_node in &self.nodes {
+            match that.nodes.get(&this_node) {
+                // it's in 'that' one too, so we need to diff it
+                Some(that_node) => {
+                    if this_node.node != that_node.node {
+                        // try to turn that_node into this_node
+                        if let Some(alter) = that_node.differ.alter(&this_node.node) {
                             sql.push_str(&alter);
                         }
-
-                        // we don't need it anymore
-                        other.nodes.remove(&node);
                     }
                 }
 
                 // it's not in the other one, so we use it as is
                 None => {
-                    sql.push_str(&node.sql);
+                    sql.push_str(&this_node.sql);
                 }
             }
         }

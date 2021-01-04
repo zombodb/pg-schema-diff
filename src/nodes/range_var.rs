@@ -9,9 +9,9 @@ impl Sql for RangeVar {
             sql.push_str("ONLY ");
         }
 
-        sql.push_str(&self.catalogname.sql_suffix("."));
-        sql.push_str(&self.schemaname.sql_suffix("."));
-        sql.push_str(&self.relname.sql());
+        sql.push_str(&self.catalogname.sql_ident_suffix("."));
+        sql.push_str(&self.schemaname.sql_ident_suffix("."));
+        sql.push_str(&self.relname.sql_ident());
         sql.push_str(&self.alias.sql());
 
         sql

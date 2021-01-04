@@ -5,7 +5,7 @@ impl Sql for IndexElem {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
-        sql.push_str(&self.name.sql());
+        sql.push_str(&self.name.sql_ident());
 
         sql
     }

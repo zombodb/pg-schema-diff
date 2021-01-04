@@ -6,7 +6,7 @@ impl Sql for ColumnDef {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
-        sql.push_str(&self.colname.sql());
+        sql.push_str(&self.colname.sql_ident());
         sql.push(' ');
         sql.push_str(&self.typeName.as_ref().unwrap().sql());
 

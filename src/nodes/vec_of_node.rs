@@ -84,6 +84,24 @@ impl SqlList for Option<Vec<Node>> {
     }
 }
 
+// impl SqlCollect for Option<dyn SqlCollect> {
+//     fn sql_wrap(self, pre: &str, post: &str) -> String {
+//         if self.is_some() {
+//             format!("{}{}{}", pre, self.as_ref().sql(), post)
+//         } else {
+//             String::new()
+//         }
+//     }
+//
+//     fn sql(self) -> String {
+//         if self.is_some() {
+//             self.as_ref().unwrap().sql()
+//         } else {
+//             String::new()
+//         }
+//     }
+// }
+
 impl<'a, I: Iterator<Item = &'a Node>> SqlCollect for I {
     fn sql_wrap(self, pre: &str, post: &str) -> String {
         format!("{}{}{}", pre, self.sql(), post)

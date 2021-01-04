@@ -33,7 +33,7 @@ impl Sql for Constraint {
 
                 sql.push_str("AS IDENTITY ");
                 sql.push('(');
-                sql.push_str(&self.options.sql(" "));
+                sql.push_str(&self.options.sql_ident());
                 sql.push(')');
             }
             ConstrType::CONSTR_GENERATED => {
@@ -60,7 +60,7 @@ impl Sql for Constraint {
                     sql.push_str(" WITH (");
                     for opt in self.options.as_ref().unwrap_or(&EMPTY_NODE_VEC) {
                         if let Node::DefElem(def_elem) = opt {
-                            sql.push_str(&def_elem.defname.sql());
+                            sql.push_str(&def_elem.defname.sql_ident());
                             sql.push_str(&def_elem.arg.sql_prefix("="));
                         } else {
                             panic!("unexpected 'options' element in Constraint::CONSTR_UNIQUE")
@@ -68,7 +68,7 @@ impl Sql for Constraint {
                     }
                     sql.push(')');
                 }
-                sql.push_str(&self.indexspace.sql_prefix(" USING INDEX TABLESPACE "))
+                sql.push_str(&self.indexspace.sql_ident_prefix(" USING INDEX TABLESPACE "))
             }
             ConstrType::CONSTR_CHECK => {
                 sql.push_str(&self.raw_expr.sql_prefix_and_wrap("CHECK ", "(", ")"));
@@ -140,12 +140,7 @@ impl Sql for Constraint {
                     sql.push_str(" INITIALLY IMMEDIATE");
                 }
             }
-            // ConstrType::CONSTR_EXCLUSION => {}
-            ConstrType::CONSTR_ATTR_DEFERRABLE => {}
-            ConstrType::CONSTR_ATTR_NOT_DEFERRABLE => {}
-            ConstrType::CONSTR_ATTR_DEFERRED => {}
-            ConstrType::CONSTR_ATTR_IMMEDIATE => {}
-            _ => unimplemented!("{:?}", self),
+            _ => unimplemented!("{:?}", self.contype),
         }
 
         sql

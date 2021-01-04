@@ -32,7 +32,7 @@ impl Sql for OnConflictClause {
                                 if i > 0 {
                                     sql.push_str(", ");
                                 }
-                                sql.push_str(&res_target.name.sql());
+                                sql.push_str(&res_target.name.sql_ident());
                                 sql.push_str(" = ");
                                 sql.push_str(&res_target.val.sql());
                                 i += 1;

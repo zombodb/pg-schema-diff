@@ -21,7 +21,7 @@ pub fn res_target_select(targets: &Option<Vec<Node>>) -> String {
             sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
             if node.name.is_some() {
                 sql.push_str(" AS ");
-                sql.push_str(&node.name.sql());
+                sql.push_str(&node.name.sql_ident());
             }
         } else {
             panic!("unexpected node: {:?}", node);
@@ -44,7 +44,7 @@ pub fn res_target_insert(targets: &Option<Vec<Node>>) -> String {
                         sql.push_str(", ");
                     }
 
-                    sql.push_str(&node.name.sql());
+                    sql.push_str(&node.name.sql_ident());
                     sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
                 } else {
                     panic!("unexpected node: {:?}", node);
@@ -97,7 +97,7 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
                 if i > 0 && i > current_i {
                     sql.push_str(", ");
                 }
-                sql.push_str(&ref_target.name.sql());
+                sql.push_str(&ref_target.name.sql_ident());
                 sql.push_str(&ref_target.indirection.sql_wrap_each(Some("["), Some("]")));
                 i += 1;
             }
@@ -110,7 +110,7 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
             if i > 0 && i > current_i {
                 sql.push_str(", ");
             }
-            sql.push_str(&node.name.sql());
+            sql.push_str(&node.name.sql_ident());
             sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
             sql.push_str(" = ");
             sql.push_str(&node.val.sql());
@@ -140,7 +140,7 @@ pub fn res_target_returning(targets: &Option<Vec<Node>>) -> String {
 
                     if node.name.is_some() {
                         sql.push_str(" AS ");
-                        sql.push_str(&node.name.sql());
+                        sql.push_str(&node.name.sql_ident());
                     }
                 } else {
                     panic!("unexpected node {:?}", node);

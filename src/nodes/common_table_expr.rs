@@ -5,7 +5,7 @@ impl Sql for CommonTableExpr {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
-        sql.push_str(&self.ctename.sql());
+        sql.push_str(&self.ctename.sql_ident());
         sql.push_str(" AS (");
         sql.push_str(&self.ctequery.sql());
         sql.push_str(") ");

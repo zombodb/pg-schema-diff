@@ -16,7 +16,7 @@ impl Sql for InferClause {
 
         if self.conname.is_some() {
             sql.push_str(" ON CONSTRAINT ");
-            sql.push_str(&self.conname.sql());
+            sql.push_str(&self.conname.sql_ident());
         }
 
         sql
