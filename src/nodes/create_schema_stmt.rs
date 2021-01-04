@@ -18,8 +18,6 @@ impl Sql for CreateSchemaStmt {
             sql.push_str(&self.schemaname.sql_ident())
         }
 
-        sql.push_str(&self.schemaElts.sql_ident());
-
         sql
     }
 }

@@ -6,7 +6,7 @@ impl Sql for InferClause {
         let mut sql = String::new();
 
         if self.indexElems.len() > 0 {
-            sql.push_str(&self.indexElems.sql_wrap(Some("("), Some(")")));
+            sql.push_str(&self.indexElems.sql_wrap(", ", "(", ")"));
         }
 
         if self.whereClause.is_some() {

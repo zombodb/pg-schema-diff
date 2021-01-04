@@ -1,5 +1,5 @@
 use crate::make_operator_name;
-use crate::schema_set::Sql;
+use crate::schema_set::{Sql, SqlIdent};
 use postgres_parser::nodes::SubLink;
 use postgres_parser::sys::SubLinkType;
 
@@ -23,11 +23,14 @@ impl Sql for SubLink {
             SubLinkType::ANY_SUBLINK => {
                 sql.push_str(&self.testexpr.sql());
                 sql.push(' ');
-                sql.push_str(
-                    &make_operator_name(&self.operName)
-                        .expect("failed to make operator name for SubLink"),
-                );
-                sql.push_str(&self.subselect.sql_wrap(" ANY (", ")"));
+
+                if self.operName.is_some() {
+                    sql.push_str(&self.operName.sql_ident());
+                    sql.push(' ');
+                } else {
+                    sql.push_str("IN ");
+                }
+                sql.push_str(&self.subselect.sql_wrap("(", ")"));
             }
             SubLinkType::ROWCOMPARE_SUBLINK => {
                 sql.push_str(&self.testexpr.sql());

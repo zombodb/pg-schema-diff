@@ -6,7 +6,7 @@ impl Sql for RowExpr {
         let mut sql = String::new();
 
         sql.push_str("ROW ");
-        sql.push_str(&self.args.sql_wrap(Some("("), Some(")")));
+        sql.push_str(&self.args.sql_wrap(", ", "(", ")"));
 
         sql
     }

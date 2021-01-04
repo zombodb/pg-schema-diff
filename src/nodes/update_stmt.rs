@@ -30,7 +30,7 @@ impl Sql for UpdateStmt {
 
         if self.fromClause.is_some() {
             sql.push_str(" FROM ");
-            sql.push_str(&self.fromClause.sql_wrap(None, None));
+            sql.push_str(&self.fromClause.sql(", "));
         }
 
         if self.whereClause.is_some() {

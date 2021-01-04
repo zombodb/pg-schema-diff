@@ -1,13 +1,13 @@
-use crate::schema_set::{Sql, SqlList};
+use crate::schema_set::{Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::VariableSetStmt;
 
 impl Sql for VariableSetStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
-        sql.push_str(&self.name.as_ref().unwrap());
+        sql.push_str(&self.name.sql_ident());
         sql.push_str(" TO ");
-        sql.push_str(&self.args.sql_wrap(None, None));
+        sql.push_str(&self.args.sql(", "));
 
         sql
     }

@@ -1,5 +1,5 @@
+use crate::get_bool_value;
 use crate::schema_set::Sql;
-use crate::{get_bool_value, get_string_value};
 use postgres_parser::nodes::DefElem;
 use postgres_parser::Node;
 
@@ -36,30 +36,48 @@ impl Sql for DefElem {
             "cost" => sql.push_str(&format!("COST {}", self.arg.sql())),
             "rows" => sql.push_str(&format!("ROWS {}", self.arg.sql())),
             "start" => sql.push_str(&format!("START WITH {}", &self.arg.sql())),
-            "as" => {
-                // sql.push_str(&format!("AS {}", self.arg.sql()));
-                if let Node::List(list) = self.arg.as_ref().unwrap().as_ref() {
+            "procedure" => sql.push_str(&format!("PROCEDURE = {}", self.arg.sql())),
+            "restrict" => sql.push_str(&format!("RESTRICT = {}", self.arg.sql())),
+            "leftarg" => sql.push_str(&format!("LEFTARG = {}", self.arg.sql())),
+            "rightarg" => sql.push_str(&format!("RIGHTARG = {}", self.arg.sql())),
+            "as" if self.arg.is_some() => {
+                let unboxed = self.arg.as_ref().unwrap();
+                if let Node::Value(value) = unboxed.as_ref() {
+                    sql.push_str(&quote(value.sql()));
+                } else if let Node::List(list) = unboxed.as_ref() {
                     sql.push_str("AS ");
-                    sql.push_str(
-                        &list
-                            .iter()
-                            .map(|e| {
-                                format!(
-                                    "'{}'",
-                                    get_string_value(e)
-                                        .as_ref()
-                                        .expect("no string value for 'as'")
-                                        .replace('\'', "''")
-                                )
-                            })
-                            .collect::<Vec<_>>()
-                            .join(", "),
-                    );
+                    for (i, node) in list.iter().enumerate() {
+                        if i > 0 {
+                            sql.push_str(", ");
+                        }
+                        sql.push_str(&quote(node.sql()));
+                    }
+                } else {
+                    sql.push_str(&self.arg.sql());
                 }
             }
-            _ => unimplemented!("defname: {}", defname),
+            _ => unimplemented!("defname: {}\n:{:#?}", defname, self),
         }
 
         sql
+    }
+}
+
+fn quote(input: String) -> String {
+    if input.contains('\'') {
+        if input.contains("$$") {
+            if input.contains("$_pgsdq$") {
+                // just something random
+                let quote: [char; 15] = rand::random();
+                let quote: String = quote.iter().collect();
+                format!("${}${}${}$", quote, input, quote)
+            } else {
+                format!("$_pgsdq${}$_pgsdq$", input)
+            }
+        } else {
+            format!("$${}$$", input)
+        }
+    } else {
+        format!("'{}'", input)
     }
 }

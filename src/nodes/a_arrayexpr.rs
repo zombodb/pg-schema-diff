@@ -7,7 +7,7 @@ impl Sql for A_ArrayExpr {
         let mut sql = String::new();
 
         sql.push_str("ARRAY[");
-        sql.push_str(&self.elements.sql_wrap(None, None));
+        sql.push_str(&self.elements.sql(", "));
         sql.push(']');
 
         sql

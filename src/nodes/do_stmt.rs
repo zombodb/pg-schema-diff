@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql};
+use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::DoStmt;
 use postgres_parser::Node;
 
@@ -7,11 +7,7 @@ impl Sql for DoStmt {
         let mut sql = String::new();
 
         sql.push_str("DO ");
-        if let Some(args) = &self.args {
-            for defelem in args {
-                sql.push_str(&defelem.sql());
-            }
-        }
+        sql.push_str(&self.args.sql(" "));
 
         sql
     }

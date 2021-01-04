@@ -10,7 +10,7 @@ impl Sql for CreateEnumStmt {
         sql.push_str(&self.typeName.sql_ident());
         sql.push_str(" AS ENUM ");
         sql.push('(');
-        sql.push_str(&self.vals.sql(", "));
+        sql.push_str(&self.vals.sql_wrap_each_and_separate(", ", "'", "'"));
         sql.push(')');
 
         sql

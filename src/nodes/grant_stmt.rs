@@ -11,7 +11,7 @@ impl Sql for GrantStmt {
         if self.privileges.is_none() {
             sql.push_str("ALL PRIVILEGES")
         } else {
-            sql.push_str(&self.privileges.as_ref().unwrap().sql());
+            sql.push_str(&self.privileges.sql(", "));
         }
 
         sql.push_str(" ON ");

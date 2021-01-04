@@ -9,7 +9,7 @@ impl Sql for WithClause {
         if self.recursive {
             sql.push_str("RECURSIVE ");
         }
-        sql.push_str(&self.ctes.sql_wrap(None, None));
+        sql.push_str(&self.ctes.sql(", "));
 
         sql
     }

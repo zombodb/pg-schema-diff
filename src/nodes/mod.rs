@@ -10,6 +10,8 @@ mod a_star;
 mod access_priv;
 mod alias;
 mod bool_expr;
+mod case_expr;
+mod case_when;
 mod coalesce_expr;
 mod coercion_context;
 mod collate_clause;
@@ -22,6 +24,7 @@ mod create_cast_stmt;
 mod create_domain_stmt;
 mod create_enum_stmt;
 mod create_function_stmt;
+mod create_op_class_item;
 mod create_op_class_stmt;
 mod create_schema_stmt;
 mod create_stmt;
@@ -44,6 +47,7 @@ mod multi_assign_ref;
 mod object_type;
 mod object_with_args;
 mod on_conflict_clause;
+mod range_function;
 mod range_subselect;
 mod range_var;
 mod res_target;
@@ -65,6 +69,7 @@ mod view_stmt;
 mod with_clause;
 
 impl Sql for Node {
+    #[track_caller]
     fn sql(&self) -> String {
         match self {
             Node::A_ArrayExpr(stmt) => stmt.sql(),
@@ -76,6 +81,8 @@ impl Sql for Node {
             Node::AccessPriv(stmt) => stmt.sql(),
             Node::Alias(stmt) => stmt.sql(),
             Node::BoolExpr(stmt) => stmt.sql(),
+            Node::CaseExpr(stmt) => stmt.sql(),
+            Node::CaseWhen(stmt) => stmt.sql(),
             Node::CoalesceExpr(stmt) => stmt.sql(),
             Node::CollateClause(stmt) => stmt.sql(),
             Node::ColumnDef(stmt) => stmt.sql(),
@@ -87,6 +94,7 @@ impl Sql for Node {
             Node::CreateDomainStmt(stmt) => stmt.sql(),
             Node::CreateEnumStmt(stmt) => stmt.sql(),
             Node::CreateFunctionStmt(stmt) => stmt.sql(),
+            Node::CreateOpClassItem(stmt) => stmt.sql(),
             Node::CreateOpClassStmt(stmt) => stmt.sql(),
             Node::CreateSchemaStmt(stmt) => stmt.sql(),
             Node::CreateStmt(stmt) => stmt.sql(),
@@ -95,6 +103,7 @@ impl Sql for Node {
             Node::DefineStmt(stmt) => stmt.sql(),
             Node::DeleteStmt(stmt) => stmt.sql(),
             Node::DoStmt(stmt) => stmt.sql(),
+            Node::Expr(node) => node.sql(),
             Node::FuncCall(stmt) => stmt.sql(),
             Node::FunctionParameter(stmt) => stmt.sql(),
             Node::GrantStmt(stmt) => stmt.sql(),
@@ -104,14 +113,15 @@ impl Sql for Node {
             Node::InsertStmt(stmt) => stmt.sql(),
             Node::IntoClause(stmt) => stmt.sql(),
             Node::JoinExpr(stmt) => stmt.sql(),
-            Node::List(stmt) => stmt.sql(),
+            Node::List(_) => unreachable!("encountered a List node"),
             Node::LockingClause(stmt) => stmt.sql(),
             Node::MultiAssignRef(stmt) => stmt.sql(),
             Node::ObjectWithArgs(stmt) => stmt.sql(),
             Node::OnConflictClause(stmt) => stmt.sql(),
+            Node::RangeFunction(stmt) => stmt.sql(),
             Node::RangeSubselect(stmt) => stmt.sql(),
             Node::RangeVar(stmt) => stmt.sql(),
-            Node::ResTarget(_stmt) => unreachable!("encountered a ResTarget node"),
+            Node::ResTarget(_) => unreachable!("encountered a ResTarget node"),
             Node::RoleSpec(stmt) => stmt.sql(),
             Node::RowExpr(stmt) => stmt.sql(),
             Node::SelectStmt(stmt) => stmt.sql(),

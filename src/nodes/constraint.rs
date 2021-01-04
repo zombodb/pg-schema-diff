@@ -1,4 +1,4 @@
-use crate::schema_set::{Sql, SqlIdent, SqlList};
+use crate::schema_set::{Len, Sql, SqlIdent, SqlList};
 use crate::{make_individual_names, EMPTY_NODE_VEC};
 use postgres_parser::nodes::Constraint;
 use postgres_parser::sys::ConstrType;
@@ -6,13 +6,20 @@ use postgres_parser::Node;
 
 impl Sql for Constraint {
     fn sql(&self) -> String {
-        eprintln!("{:#?}", self);
         let mut sql = String::new();
 
         match self.contype {
             ConstrType::CONSTR_NOTNULL => sql.push_str("NOT NULL"),
             ConstrType::CONSTR_NULL => sql.push_str("NULL"),
-            ConstrType::CONSTR_PRIMARY => sql.push_str("PRIMARY KEY"),
+            ConstrType::CONSTR_PRIMARY => {
+                sql.push_str("PRIMARY KEY");
+
+                if !self.keys.is_empty() {
+                    sql.push('(');
+                    sql.push_str(&self.keys.sql(", "));
+                    sql.push(')');
+                }
+            }
             ConstrType::CONSTR_DEFAULT => {
                 sql.push_str("DEFAULT ");
                 sql.push_str(

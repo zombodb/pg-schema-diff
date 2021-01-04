@@ -12,7 +12,7 @@ impl Sql for DefineStmt {
         }
         sql.push_str(&self.kind.sql());
         sql.push(' ');
-        sql.push_str(&self.defnames.sql_ident());
+        sql.push_str(&self.defnames.sql("."));
 
         if self.args.len() > 0 {
             sql.push_str(" AS (");
@@ -21,9 +21,9 @@ impl Sql for DefineStmt {
         }
 
         if self.definition.len() > 0 {
-            sql.push(')');
-            sql.push_str(&self.definition.sql(", "));
             sql.push('(');
+            sql.push_str(&self.definition.sql(", "));
+            sql.push(')');
         }
 
         sql

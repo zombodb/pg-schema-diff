@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql, SqlCollect, SqlList};
+use crate::schema_set::{Diff, Sql, SqlCollect, SqlIdent, SqlList};
 use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::nodes::CreateFunctionStmt;
 
@@ -22,7 +22,7 @@ impl Sql for CreateFunctionStmt {
             sql.push_str("FUNCTION ");
         }
 
-        sql.push_str(&make_name(&self.funcname).expect("no 'funcname' for CreateFunctionStmt"));
+        sql.push_str(&self.funcname.sql_ident());
         sql.push_str(
             &self
                 .parameters

@@ -1,7 +1,7 @@
 use crate::{make_name, EMPTY_NODE_VEC};
-use postgres_parser::{quote_identifier, Node, SqlStatementScanner};
+use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 
-use std::collections::HashSet;
+use indexmap::set::IndexSet;
 use std::hash::{Hash, Hasher};
 
 pub struct DiffableStatement {
@@ -55,11 +55,12 @@ pub trait Sql {
 }
 
 pub trait SqlList {
+    fn sql(&self, sep: &str) -> String;
     fn sql_prefix(&self, pre: &str, sep: &str) -> String;
     fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str, sep: &str) -> String;
-    fn sql(&self, sep: &str) -> String;
     fn sql_wrap_each(&self, pre: Option<&str>, post: Option<&str>) -> String;
-    fn sql_wrap(&self, pre: Option<&str>, post: Option<&str>) -> String;
+    fn sql_wrap_each_and_separate(&self, sep: &str, pre: &str, post: &str) -> String;
+    fn sql_wrap(&self, sep: &str, pre: &str, post: &str) -> String;
 }
 
 pub trait SqlIdent {
@@ -98,7 +99,22 @@ impl<T: Sql> Sql for Option<Box<T>> {
 
 impl SqlIdent for Option<String> {
     fn sql_ident(&self) -> String {
-        quote_identifier(self)
+        match self {
+            Some(ident) => {
+                for _ in ident.chars().filter(|c| {
+                    ![
+                        '+', '-', '*', '/', '<', '>', '=', '~', '!', '@', '#', '%', '^', '&', '|',
+                        '`', '?',
+                    ]
+                    .contains(c)
+                }) {
+                    return quote_identifier(self);
+                }
+
+                return ident.clone();
+            }
+            None => quote_identifier(self),
+        }
     }
 
     fn sql_ident_prefix(&self, pre: &str) -> String {
@@ -141,6 +157,9 @@ impl SqlIdent for Option<Vec<Node>> {
 
 pub trait Len {
     fn len(&self) -> usize;
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl Len for Option<Vec<Node>> {
@@ -150,7 +169,7 @@ impl Len for Option<Vec<Node>> {
 }
 
 pub struct SchemaSet {
-    nodes: HashSet<DiffableStatement>,
+    nodes: IndexSet<DiffableStatement>,
 }
 
 impl Default for SchemaSet {
@@ -230,8 +249,25 @@ impl SchemaSet {
         let mut sql = String::new();
 
         for node in &self.nodes {
+            let deparsed = node.node.sql();
+            let reparsed = parse_query(&deparsed).unwrap_or_else(|e| {
+                panic!(
+                    "FAILED TO REPARSE:\n{:#?}\nORIG:\n   {}\nNEW:\n   {};",
+                    e, node.sql, deparsed
+                )
+            });
+            if &node.node != reparsed.get(0).expect("didn't parse anything") {
+                panic!(
+                    "TREES NOT EQUAL:{:#?};\n---------\n{:#?};\n\n\nORIG:\n   {}\nNEW:\n   {};\n",
+                    node.node,
+                    reparsed.get(0).unwrap(),
+                    node.sql,
+                    deparsed
+                );
+            }
+
             sql.push_str(&node.node.sql());
-            sql.push('\n');
+            sql.push_str(";\n");
         }
 
         sql
@@ -242,7 +278,7 @@ impl SchemaSet {
         let mut sql = String::new();
 
         for this_node in &self.nodes {
-            match that.nodes.get(&this_node) {
+            match that.nodes.get(this_node) {
                 // it's in 'that' one too, so we need to diff it
                 Some(that_node) => {
                     if this_node.node != that_node.node {

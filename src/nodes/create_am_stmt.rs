@@ -8,7 +8,7 @@ impl Sql for CreateAmStmt {
 
         sql.push_str("CREATE ACCESS METHOD ");
         sql.push_str(&self.amname.sql_ident());
-        sql.push_str("TYPE ");
+        sql.push_str(" TYPE ");
         match self.amtype {
             't' => sql.push_str("TABLE"),
             'i' => sql.push_str("INDEX"),

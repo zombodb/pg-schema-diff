@@ -7,7 +7,9 @@ impl Sql for FuncCall {
         let mut sql = String::new();
 
         sql.push_str(&make_name(&self.funcname).expect("no name for FuncCall"));
-        sql.push_str(&self.args.sql_wrap(Some("("), Some(")")));
+        sql.push('(');
+        sql.push_str(&self.args.sql(", "));
+        sql.push(')');
         sql
     }
 }

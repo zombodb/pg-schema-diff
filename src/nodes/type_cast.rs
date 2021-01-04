@@ -5,6 +5,7 @@ impl Sql for TypeCast {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
+        sql.push('(');
         sql.push_str(
             &self
                 .arg
@@ -13,6 +14,7 @@ impl Sql for TypeCast {
                 .as_ref()
                 .sql(),
         );
+        sql.push(')');
         sql.push_str("::");
         sql.push_str(&self.typeName.as_ref().unwrap().sql());
 

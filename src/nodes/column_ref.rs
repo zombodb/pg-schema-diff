@@ -1,10 +1,9 @@
-use crate::make_name;
 use crate::schema_set::SqlIdent;
 use postgres_parser::nodes::ColumnRef;
 
 impl SqlIdent for ColumnRef {
     fn sql_ident(&self) -> String {
-        make_name(&self.fields).expect("unable to make 'fields' for ColumnRef")
+        self.fields.sql_ident()
     }
 
     fn sql_ident_prefix(&self, pre: &str) -> String {

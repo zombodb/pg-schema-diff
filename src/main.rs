@@ -67,7 +67,8 @@ pub fn make_name(names: &Option<Vec<Node>>) -> Result<String, PgParserError> {
             Ok(result)
         }
 
-        None => Err(PgParserError::InternalNull),
+        // None => Err(PgParserError::InternalNull),
+        None => Ok("".into()),
     }
 }
 

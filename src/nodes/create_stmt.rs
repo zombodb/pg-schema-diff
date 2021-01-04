@@ -29,7 +29,7 @@ impl Sql for CreateStmt {
                 .expect("no 'relation' for CreateStmt")
                 .sql(),
         );
-        sql.push_str(&self.tableElts.sql_wrap(Some("("), Some(")")));
+        sql.push_str(&self.tableElts.sql_wrap(", ", "(", ")"));
 
         sql
     }

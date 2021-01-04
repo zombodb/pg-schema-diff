@@ -25,7 +25,7 @@ impl Sql for SelectStmt {
         sql.push_str(&self.withClause.sql());
         if let Some(values_list) = self.valuesLists.as_ref() {
             sql.push_str("VALUES (");
-            sql.push_str(&values_list.sql());
+            sql.push_str(&values_list.sql(", "));
             sql.push(')');
         } else {
             sql.push_str("SELECT ");
