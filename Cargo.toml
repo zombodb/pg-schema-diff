@@ -5,6 +5,7 @@ authors = ["ZomboDB, LLC <zombodb@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+colored = "2.0.0"
 indexmap = "1.6.1"
 postgres-parser = "0.2.0"
 rand = "0.8.0"

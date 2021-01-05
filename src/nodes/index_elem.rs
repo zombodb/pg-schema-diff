@@ -6,6 +6,8 @@ impl Sql for IndexElem {
         let mut sql = String::new();
 
         sql.push_str(&self.name.sql_ident());
+        sql.push(' ');
+        sql.push_str(&self.ordering.sql());
 
         sql
     }

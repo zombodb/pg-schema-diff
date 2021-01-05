@@ -1,6 +1,7 @@
 use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 
+use colored::Colorize;
 use indexmap::set::IndexSet;
 use std::hash::{Hash, Hasher};
 
@@ -47,10 +48,34 @@ pub trait Diff: Sql {
     }
 }
 
+pub trait SqlMaybeList {
+    fn sql_maybe_list(&self, sep: &str) -> String;
+}
+
+impl SqlMaybeList for Option<Box<Node>> {
+    fn sql_maybe_list(&self, sep: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(boxed_sql) => boxed_sql.sql_maybe_list(sep),
+        }
+    }
+}
+
+impl SqlMaybeList for Node {
+    fn sql_maybe_list(&self, sep: &str) -> String {
+        if let Node::List(v) = self {
+            v.sql(sep)
+        } else {
+            self.sql()
+        }
+    }
+}
+
 pub trait Sql {
     fn sql_prefix(&self, pre: &str) -> String {
         format!("{}{}", pre, self.sql())
     }
+    #[track_caller]
     fn sql_wrap(&self, pre: &str, post: &str) -> String {
         format!("{}{}{}", pre, self.sql(), post)
     }
@@ -95,6 +120,7 @@ impl<T: Sql> Sql for Option<Box<T>> {
         }
     }
 
+    #[track_caller]
     fn sql(&self) -> String {
         match self {
             None => String::new(),
@@ -105,22 +131,7 @@ impl<T: Sql> Sql for Option<Box<T>> {
 
 impl SqlIdent for Option<String> {
     fn sql_ident(&self) -> String {
-        match self {
-            Some(ident) => {
-                for _ in ident.chars().filter(|c| {
-                    ![
-                        '+', '-', '*', '/', '<', '>', '=', '~', '!', '@', '#', '%', '^', '&', '|',
-                        '`', '?',
-                    ]
-                    .contains(c)
-                }) {
-                    return quote_identifier(self);
-                }
-
-                return ident.clone();
-            }
-            None => quote_identifier(self),
-        }
+        quote_identifier(self)
     }
 
     fn sql_ident_prefix(&self, pre: &str) -> String {
@@ -232,8 +243,12 @@ impl SchemaSet {
             Node::DropStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::AlterFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::ExplainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CopyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::IndexStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CompositeTypeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterTableStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
 
-            _ => panic!("unknown node: {:?}", node),
+            _ => panic!("unknown node: {:?}\n\n{}", node, sql),
         };
     }
 
@@ -251,9 +266,8 @@ impl SchemaSet {
                 }
 
                 // it couldn't be parsed.  Just display the underlying parse error
-                Err(e) => {
-                    eprintln!("{}", stmt.sql);
-                    eprintln!("-- ERROR:  {:?}", e);
+                Err(_e) => {
+                    // eprintln!("---\nINPUT PARSE ERROR: {:?}\n{}\n/---", e, stmt.sql.trim());
                 }
             };
         }
@@ -280,8 +294,10 @@ impl SchemaSet {
                 );
             }
 
-            sql.push_str(&node.node.sql());
-            sql.push_str(";\n");
+            sql.push_str("==================\n");
+            sql.push_str(&format!("{}:\n{}\n", "BEFORE".yellow(), node.sql.trim()));
+            sql.push_str(&format!("{}:\n{};\n", "AFTER".green(), deparsed.trim()));
+            sql.push_str("/=================\n");
         }
 
         sql

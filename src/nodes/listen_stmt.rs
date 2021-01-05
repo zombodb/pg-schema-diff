@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql};
+use crate::schema_set::{Diff, Sql, SqlIdent};
 use postgres_parser::nodes::ListenStmt;
 
 impl Sql for ListenStmt {
@@ -6,7 +6,7 @@ impl Sql for ListenStmt {
         let mut sql = String::new();
 
         sql.push_str("LISTEN ");
-        sql.push_str(&self.conditionname.as_ref().unwrap());
+        sql.push_str(&self.conditionname.sql_ident());
 
         sql
     }

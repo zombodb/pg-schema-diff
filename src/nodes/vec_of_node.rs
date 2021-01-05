@@ -1,4 +1,4 @@
-use crate::schema_set::{Sql, SqlCollect, SqlList};
+use crate::schema_set::{Sql, SqlCollect, SqlList, SqlMaybeList};
 
 use postgres_parser::Node;
 
@@ -55,7 +55,7 @@ impl SqlList for Vec<Node> {
             }
 
             sql.push_str(pre);
-            sql.push_str(&node.sql());
+            sql.push_str(&node.sql_maybe_list(sep));
             sql.push_str(post);
         }
 

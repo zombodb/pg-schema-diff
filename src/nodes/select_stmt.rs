@@ -24,9 +24,8 @@ impl Sql for SelectStmt {
 
         sql.push_str(&self.withClause.sql());
         if let Some(values_list) = self.valuesLists.as_ref() {
-            sql.push_str("VALUES (");
-            sql.push_str(&values_list.sql(", "));
-            sql.push(')');
+            sql.push_str("VALUES ");
+            sql.push_str(&values_list.sql_wrap_each_and_separate(", ", "(", ")"));
         } else {
             sql.push_str("SELECT ");
             sql.push_str(&self.distinctClause.sql_prefix(" DISTINCT ", ", "));

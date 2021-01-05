@@ -8,7 +8,7 @@ impl Sql for ColumnDef {
 
         sql.push_str(&self.colname.sql_ident());
         sql.push(' ');
-        sql.push_str(&self.typeName.as_ref().unwrap().sql());
+        sql.push_str(&self.typeName.sql());
 
         for constraint in self.constraints.as_ref().unwrap_or(&EMPTY_NODE_VEC) {
             sql.push(' ');

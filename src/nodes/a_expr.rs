@@ -1,5 +1,5 @@
 use crate::make_operator_name;
-use crate::schema_set::Sql;
+use crate::schema_set::{Sql, SqlMaybeList};
 use postgres_parser::nodes::A_Expr;
 use postgres_parser::sys::A_Expr_Kind;
 use postgres_parser::Node;
@@ -54,7 +54,9 @@ impl Sql for A_Expr {
             A_Expr_Kind::AEXPR_OF => panic!("what is AEXPR_OF?"),
             A_Expr_Kind::AEXPR_IN => {
                 sql.push_str(&self.lexpr.sql());
-                sql.push_str(&self.rexpr.sql_wrap(" IN (", ")"));
+                sql.push_str(" IN (");
+                sql.push_str(&self.rexpr.sql_maybe_list(", "));
+                sql.push(')');
             }
             A_Expr_Kind::AEXPR_LIKE => {
                 sql.push_str(&self.lexpr.sql());

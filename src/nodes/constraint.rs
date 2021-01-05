@@ -19,6 +19,10 @@ impl Sql for Constraint {
                     sql.push_str(&self.keys.sql(", "));
                     sql.push(')');
                 }
+
+                if self.deferrable {
+                    sql.push_str(" DEFERRABLE ");
+                }
             }
             ConstrType::CONSTR_DEFAULT => {
                 sql.push_str("DEFAULT ");

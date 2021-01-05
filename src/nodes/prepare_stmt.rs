@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Len, Sql, SqlList};
+use crate::schema_set::{Diff, Len, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::PrepareStmt;
 
 impl Sql for PrepareStmt {
@@ -7,7 +7,7 @@ impl Sql for PrepareStmt {
 
         sql.push_str("PREPARE ");
 
-        sql.push_str(&self.name.as_ref().unwrap());
+        sql.push_str(&self.name.sql_ident());
         if self.argtypes.len() > 0 {
             sql.push_str(&self.argtypes.sql(", "))
         }

@@ -33,14 +33,15 @@ impl Sql for CreateStmt {
             sql.push_str("IF NOT EXISTS ");
         }
 
+        sql.push_str(&self.relation.sql());
+        sql.push('(');
+        sql.push_str(&self.tableElts.sql(", "));
+        sql.push(')');
         sql.push_str(
             &self
-                .relation
-                .as_ref()
-                .expect("no 'relation' for CreateStmt")
-                .sql(),
+                .inhRelations
+                .sql_prefix_and_wrap(" INHERITS ", "(", ")", ", "),
         );
-        sql.push_str(&self.tableElts.sql_wrap(", ", "(", ")"));
         sql.push_str(&self.oncommit.sql_prefix(" "));
 
         sql

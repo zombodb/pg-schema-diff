@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql};
+use crate::schema_set::{Diff, Sql, SqlIdent};
 use postgres_parser::nodes::DeclareCursorStmt;
 
 impl Sql for DeclareCursorStmt {
@@ -6,7 +6,7 @@ impl Sql for DeclareCursorStmt {
         let mut sql = String::new();
 
         sql.push_str("DECLARE ");
-        sql.push_str(&self.portalname.as_ref().unwrap());
+        sql.push_str(&self.portalname.sql_ident());
 
         if self.options & 0x0001 != 0 {
             sql.push_str(" BINARY");

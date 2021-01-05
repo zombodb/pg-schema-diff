@@ -10,7 +10,7 @@ impl Sql for CreateOpClassItem {
                 sql.push_str("OPERATOR ");
                 sql.push_str(&self.number.to_string());
                 sql.push(' ');
-                sql.push_str(&self.name.sql());
+                sql.push_str(&self.name.sql().replace('"', ""));
                 sql.push(' ');
                 sql.push_str(&self.order_family.sql(" "))
             }

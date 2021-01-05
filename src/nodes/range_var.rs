@@ -8,7 +8,6 @@ impl Sql for RangeVar {
         if !self.inh {
             sql.push_str("ONLY ");
         }
-
         sql.push_str(&self.catalogname.sql_ident_suffix("."));
         sql.push_str(&self.schemaname.sql_ident_suffix("."));
         sql.push_str(&self.relname.sql_ident());

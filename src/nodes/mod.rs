@@ -10,6 +10,8 @@ mod a_star;
 mod access_priv;
 mod alias;
 mod alter_function_stmt;
+mod alter_table_cmd;
+mod alter_table_stmt;
 mod bool_expr;
 mod case_expr;
 mod case_when;
@@ -19,7 +21,9 @@ mod collate_clause;
 mod column_def;
 mod column_ref;
 mod common_table_expr;
+mod composite_type_stmt;
 mod constraint;
+mod copy_stmt;
 mod create_am_stmt;
 mod create_cast_stmt;
 mod create_domain_stmt;
@@ -46,6 +50,7 @@ mod function_parameter;
 mod grant_role_stmt;
 mod grant_stmt;
 mod index_elem;
+mod index_stmt;
 mod infer_clause;
 mod insert_stmt;
 mod into_clause;
@@ -68,6 +73,7 @@ mod row_expr;
 mod select_stmt;
 mod set_to_default;
 mod sort_by;
+mod sort_by_dir;
 mod sql_value_function;
 mod sub_link;
 mod transaction_stmt;
@@ -95,6 +101,8 @@ impl Sql for Node {
             Node::AccessPriv(stmt) => stmt.sql(),
             Node::Alias(stmt) => stmt.sql(),
             Node::AlterFunctionStmt(stmt) => stmt.sql(),
+            Node::AlterTableCmd(stmt) => stmt.sql(),
+            Node::AlterTableStmt(stmt) => stmt.sql(),
             Node::BoolExpr(stmt) => stmt.sql(),
             Node::CaseExpr(stmt) => stmt.sql(),
             Node::CaseWhen(stmt) => stmt.sql(),
@@ -103,7 +111,9 @@ impl Sql for Node {
             Node::ColumnDef(stmt) => stmt.sql(),
             Node::ColumnRef(stmt) => stmt.sql_ident(),
             Node::CommonTableExpr(stmt) => stmt.sql(),
+            Node::CompositeTypeStmt(stmt) => stmt.sql(),
             Node::Constraint(stmt) => stmt.sql(),
+            Node::CopyStmt(stmt) => stmt.sql(),
             Node::CreateAmStmt(stmt) => stmt.sql(),
             Node::CreateCastStmt(stmt) => stmt.sql(),
             Node::CreateDomainStmt(stmt) => stmt.sql(),
@@ -130,6 +140,7 @@ impl Sql for Node {
             Node::GrantStmt(stmt) => stmt.sql(),
             Node::GrantRoleStmt(stmt) => stmt.sql(),
             Node::IndexElem(stmt) => stmt.sql(),
+            Node::IndexStmt(stmt) => stmt.sql(),
             Node::InferClause(stmt) => stmt.sql(),
             Node::InsertStmt(stmt) => stmt.sql(),
             Node::IntoClause(stmt) => stmt.sql(),

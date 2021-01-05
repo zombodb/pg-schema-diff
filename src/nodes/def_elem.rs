@@ -40,6 +40,11 @@ impl Sql for DefElem {
             "restrict" => sql.push_str(&format!("RESTRICT = {}", self.arg.sql())),
             "leftarg" => sql.push_str(&format!("LEFTARG = {}", self.arg.sql())),
             "rightarg" => sql.push_str(&format!("RIGHTARG = {}", self.arg.sql())),
+
+            "null" => sql.push_str(&format!("NULL {}", scalar(self.arg.sql()))),
+
+            "costs" => sql.push_str(&format!("COSTS {}", scalar(self.arg.sql()))),
+
             "as" if self.arg.is_some() => {
                 let unboxed = self.arg.as_ref().unwrap();
                 if let Node::Value(value) = unboxed.as_ref() {
@@ -56,7 +61,13 @@ impl Sql for DefElem {
                     sql.push_str(&self.arg.sql());
                 }
             }
-            _ => unimplemented!("defname: {}\n:{:#?}", defname, self),
+            key => {
+                if self.arg.is_some() {
+                    sql.push_str(&format!("{} = {}", key, scalar(self.arg.sql())))
+                } else {
+                    sql.push_str(key)
+                }
+            }
         }
 
         sql
@@ -80,4 +91,14 @@ fn quote(input: String) -> String {
     } else {
         format!("'{}'", input)
     }
+}
+
+fn scalar(input: String) -> String {
+    for c in input.chars() {
+        if !['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-'].contains(&c) {
+            return format!("'{}'", input.replace('\'', "''"));
+        }
+    }
+
+    input
 }

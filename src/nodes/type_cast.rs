@@ -16,7 +16,7 @@ impl Sql for TypeCast {
         );
         sql.push(')');
         sql.push_str("::");
-        sql.push_str(&self.typeName.as_ref().unwrap().sql());
+        sql.push_str(&self.typeName.sql());
 
         sql
     }

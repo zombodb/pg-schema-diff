@@ -18,7 +18,7 @@ impl Sql for FunctionParameter {
             sql.push_str(&format!("\"{}\" ", name));
         }
 
-        sql.push_str(&self.argType.as_ref().unwrap().sql());
+        sql.push_str(&self.argType.sql());
         if let Some(defexpr) = self.defexpr.as_ref() {
             sql.push_str(" DEFAULT ");
             sql.push_str(&defexpr.sql());

@@ -45,7 +45,10 @@ impl Sql for SubLink {
                 sql.push_str(&self.subselect.sql_wrap("(", ")"));
             }
             SubLinkType::MULTIEXPR_SUBLINK => unimplemented!("SubLinkType::MULTIEXPR_SUBLINK"),
-            SubLinkType::ARRAY_SUBLINK => unimplemented!("SubLinkType::ARRAY_SUBLINK"),
+            SubLinkType::ARRAY_SUBLINK => {
+                sql.push_str("array");
+                sql.push_str(&self.subselect.sql_wrap("(", ")"));
+            }
             SubLinkType::CTE_SUBLINK => unimplemented!("SubLinkType::CTE_SUBLINK"),
         }
 

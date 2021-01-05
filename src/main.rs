@@ -14,7 +14,8 @@ fn main() {
     if b.is_none() {
         let mut set = SchemaSet::new();
         set.scan_file(&a);
-        println!("{}", set.deparse());
+        let deparsed = set.deparse();
+        println!("{}", deparsed);
     } else {
         let b = b.unwrap();
         let mut a_set = SchemaSet::new();
