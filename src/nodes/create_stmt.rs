@@ -3,20 +3,6 @@ use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::CreateStmt;
 use postgres_parser::Node;
 
-impl Diff for CreateStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, _: &str) -> String {
-        self.relation.as_ref().unwrap().sql()
-    }
-}
-
 impl Sql for CreateStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
@@ -45,5 +31,19 @@ impl Sql for CreateStmt {
         sql.push_str(&self.oncommit.sql_prefix(" "));
 
         sql
+    }
+}
+
+impl Diff for CreateStmt {
+    fn alter(&self, _other: &Node) -> Option<String> {
+        unimplemented!()
+    }
+
+    fn drop(&self) -> String {
+        unimplemented!()
+    }
+
+    fn name(&self, _: &str) -> String {
+        self.relation.as_ref().unwrap().sql()
     }
 }
