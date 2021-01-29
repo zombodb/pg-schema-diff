@@ -13,8 +13,21 @@ impl Sql for FuncCall {
         } else if self.agg_distinct {
             sql.push_str("DISTINCT ");
         }
+        if self.func_variadic {
+            sql.push_str("VARIADIC ");
+        }
         sql.push_str(&self.args.sql(", "));
+        if self.agg_within_group {
+            sql.push(')');
+            sql.push_str(" WITHIN GROUP (")
+        }
+        sql.push_str(&self.agg_order.sql_prefix(" ORDER BY ", ", "));
         sql.push(')');
+        sql.push_str(
+            &self
+                .agg_filter
+                .sql_prefix_and_wrap(" FILTER", "(WHERE ", ")"),
+        );
         sql
     }
 }

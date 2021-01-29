@@ -20,14 +20,25 @@ impl Sql for CreateStmt {
         }
 
         sql.push_str(&self.relation.sql());
-        sql.push('(');
-        sql.push_str(&self.tableElts.sql(", "));
-        sql.push(')');
-        sql.push_str(
-            &self
-                .inhRelations
-                .sql_prefix_and_wrap(" INHERITS ", "(", ")", ", "),
-        );
+
+        if self.partbound.is_some() {
+            sql.push_str(&self.inhRelations.sql_prefix(" PARTITION OF ", ", "));
+            sql.push_str(&self.partbound.sql_prefix(" "));
+        } else {
+            sql.push('(');
+            sql.push_str(&self.tableElts.sql(", "));
+            sql.push(')');
+        }
+
+        if self.partbound.is_none() {
+            sql.push_str(
+                &self
+                    .inhRelations
+                    .sql_prefix_and_wrap(" INHERITS ", "(", ")", ", "),
+            );
+        }
+        sql.push_str(&self.partspec.sql_prefix(" PARTITION BY "));
+
         sql.push_str(&self.oncommit.sql_prefix(" "));
 
         sql

@@ -1,4 +1,4 @@
-use crate::schema_set::Sql;
+use crate::schema_set::{Sql, SqlIdent};
 use postgres_parser::nodes::FunctionParameter;
 use postgres_parser::sys::FunctionParameterMode;
 
@@ -14,15 +14,9 @@ impl Sql for FunctionParameter {
             FunctionParameterMode::FUNC_PARAM_TABLE => { /* do nothing */ }
         }
 
-        if let Some(name) = self.name.as_ref() {
-            sql.push_str(&format!("\"{}\" ", name));
-        }
-
+        sql.push_str(&self.name.sql_ident_suffix(" "));
         sql.push_str(&self.argType.sql());
-        if let Some(defexpr) = self.defexpr.as_ref() {
-            sql.push_str(" DEFAULT ");
-            sql.push_str(&defexpr.sql());
-        }
+        sql.push_str(&self.defexpr.sql_prefix(" DEFAULT "));
 
         sql
     }

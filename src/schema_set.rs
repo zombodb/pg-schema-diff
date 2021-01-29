@@ -280,8 +280,8 @@ impl SchemaSet {
             let deparsed = node.node.sql();
             let reparsed = parse_query(&deparsed).unwrap_or_else(|e| {
                 panic!(
-                    "FAILED TO REPARSE:\n{:#?}\nORIG:\n   {}\nNEW:\n   {};",
-                    e, node.sql, deparsed
+                    "FAILED TO REPARSE:\n{:#?}\n{:#?}\nORIG:\n   {}\nNEW:\n   {};",
+                    e, node.node, node.sql, deparsed,
                 )
             });
             if &node.node != reparsed.get(0).expect("didn't parse anything") {

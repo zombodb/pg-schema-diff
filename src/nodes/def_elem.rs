@@ -45,6 +45,11 @@ impl Sql for DefElem {
 
             "costs" => sql.push_str(&format!("COSTS {}", scalar(self.arg.sql()))),
 
+            "stype" => sql.push_str(&format!("STYPE = {}", self.arg.sql())),
+            "sfunc" => sql.push_str(&format!("SFUNC = {}", self.arg.sql())),
+            "finalfunc" => sql.push_str(&format!("FINALFUNC = {}", self.arg.sql())),
+            "initcond" => sql.push_str(&format!("INITCOND = '{}'", self.arg.sql())),
+
             "as" if self.arg.is_some() => {
                 let unboxed = self.arg.as_ref().unwrap();
                 if let Node::Value(value) = unboxed.as_ref() {

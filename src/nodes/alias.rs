@@ -7,7 +7,7 @@ impl Sql for Alias {
 
         sql.push_str(" AS ");
         sql.push_str(&self.aliasname.sql_ident());
-        sql.push_str(&self.colnames.sql_wrap_each_and_separate(", ", "(", ")"));
+        sql.push_str(&self.colnames.sql_wrap(", ", "(", ")"));
 
         sql
     }

@@ -6,7 +6,13 @@ impl Sql for CompositeTypeStmt {
         let mut sql = String::new();
 
         sql.push_str("CREATE TYPE ");
-        sql.push_str(&self.typevar.sql());
+
+        // we don't want .inh=false b/c that'll cause the RangeVar to output an "ONLY" and that's
+        // not a thing here
+        let mut typevar = self.typevar.clone();
+        typevar.as_mut().unwrap().inh = true;
+        sql.push_str(&typevar.sql());
+
         sql.push_str(" AS ");
         sql.push_str(&self.coldeflist.sql_wrap(", ", "(", ")"));
         sql

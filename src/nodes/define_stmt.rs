@@ -1,5 +1,6 @@
-use crate::schema_set::{Diff, Len, Sql, SqlIdent, SqlList};
+use crate::schema_set::{Diff, Len, Sql, SqlIdent, SqlList, SqlMaybeList};
 use postgres_parser::nodes::DefineStmt;
+use postgres_parser::sys::ObjectType;
 use postgres_parser::Node;
 
 impl Sql for DefineStmt {
@@ -15,9 +16,23 @@ impl Sql for DefineStmt {
         sql.push_str(&self.defnames.sql("."));
 
         if self.args.len() > 0 {
-            sql.push_str(" AS (");
-            sql.push_str(&self.args.sql(", "));
-            sql.push(')');
+            if self.kind != ObjectType::OBJECT_AGGREGATE {
+                sql.push_str(" AS ");
+            }
+
+            match self.kind {
+                ObjectType::OBJECT_AGGREGATE if !self.oldstyle => {
+                    sql.push('(');
+                    let args = self.args.as_ref().unwrap().get(0).cloned().unwrap();
+                    sql.push_str(&args.sql_maybe_list(", "));
+                    sql.push(')');
+                }
+                _ => {
+                    sql.push('(');
+                    sql.push_str(&self.args.sql(", "));
+                    sql.push(')');
+                }
+            }
         }
 
         if self.definition.len() > 0 {

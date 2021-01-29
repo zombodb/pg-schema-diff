@@ -63,6 +63,9 @@ mod object_type;
 mod object_with_args;
 mod on_commit_action;
 mod on_conflict_clause;
+mod partition_bound_spec;
+mod partition_elem;
+mod partition_spec;
 mod prepare_stmt;
 mod range_function;
 mod range_subselect;
@@ -150,6 +153,9 @@ impl Sql for Node {
             Node::LockingClause(stmt) => stmt.sql(),
             Node::MultiAssignRef(stmt) => stmt.sql(),
             Node::NullTest(stmt) => stmt.sql(),
+            Node::PartitionBoundSpec(stmt) => stmt.sql(),
+            Node::PartitionElem(stmt) => stmt.sql(),
+            Node::PartitionSpec(stmt) => stmt.sql(),
             Node::PrepareStmt(stmt) => stmt.sql(),
             Node::ObjectWithArgs(stmt) => stmt.sql(),
             Node::OnConflictClause(stmt) => stmt.sql(),
