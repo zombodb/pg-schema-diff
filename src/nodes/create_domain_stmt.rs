@@ -12,7 +12,7 @@ impl Sql for CreateDomainStmt {
         sql.push_str(" AS ");
         sql.push_str(&self.typeName.sql());
 
-        sql.push_str(&self.collClause.sql_prefix(" COLLATE"));
+        sql.push_str(&self.collClause.sql());
         sql.push_str(&self.constraints.sql_prefix(" ", " "));
 
         sql

@@ -1,5 +1,6 @@
 use crate::schema_set::{Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::TypeName;
+use postgres_parser::Node;
 
 impl Sql for TypeName {
     fn sql(&self) -> String {
@@ -10,12 +11,20 @@ impl Sql for TypeName {
         }
 
         sql.push_str(&self.names.sql_ident());
+        sql.push_str(&self.typmods.sql_wrap(",", "(", ")"));
+
         if let Some(array_bounds) = self.arrayBounds.as_ref() {
-            for _ in 0..array_bounds.len() {
-                sql.push_str("[]");
+            for bound in array_bounds {
+                if let Node::Value(bound) = bound {
+                    let bound = bound.int.unwrap();
+                    if bound == -1 {
+                        sql.push_str("[]");
+                    } else {
+                        sql.push_str(&format!("[{}]", bound));
+                    }
+                }
             }
         }
-        sql.push_str(&self.typmods.sql_wrap(",", "(", ")"));
 
         sql
     }

@@ -1,6 +1,7 @@
-use crate::schema_set::{Sql, SqlIdent, SqlList};
+use crate::schema_set::{Sql, SqlIdent};
 use crate::EMPTY_NODE_VEC;
 
+use crate::nodes::a_indirection::indirection_list;
 use postgres_parser::Node;
 
 pub fn res_target_select(targets: &Option<Vec<Node>>) -> String {
@@ -18,7 +19,7 @@ pub fn res_target_select(targets: &Option<Vec<Node>>) -> String {
             }
 
             sql.push_str(&node.val.sql());
-            sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
+            sql.push_str(&indirection_list(&node.indirection));
             if node.name.is_some() {
                 sql.push_str(" AS ");
                 sql.push_str(&node.name.sql_ident());
@@ -45,7 +46,7 @@ pub fn res_target_insert(targets: &Option<Vec<Node>>) -> String {
                     }
 
                     sql.push_str(&node.name.sql_ident());
-                    sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
+                    sql.push_str(&indirection_list(&node.indirection));
                 } else {
                     panic!("unexpected node: {:?}", node);
                 }
@@ -93,12 +94,12 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
         let current_i = i;
         if !mars.is_empty() {
             sql.push('(');
-            for (_, ref_target) in &mars {
+            for (_, res_target) in &mars {
                 if i > 0 && i > current_i {
                     sql.push_str(", ");
                 }
-                sql.push_str(&ref_target.name.sql_ident());
-                sql.push_str(&ref_target.indirection.sql_wrap_each(Some("["), Some("]")));
+                sql.push_str(&res_target.name.sql_ident());
+                sql.push_str(&indirection_list(&res_target.indirection));
                 i += 1;
             }
             sql.push_str(") = ");
@@ -111,7 +112,7 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
                 sql.push_str(", ");
             }
             sql.push_str(&node.name.sql_ident());
-            sql.push_str(&node.indirection.sql_wrap_each(Some("["), Some("]")));
+            sql.push_str(&indirection_list(&node.indirection));
             sql.push_str(" = ");
             sql.push_str(&node.val.sql());
 

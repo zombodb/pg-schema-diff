@@ -1,5 +1,5 @@
 use crate::make_operator_name;
-use crate::schema_set::{Sql, SqlMaybeList};
+use crate::schema_set::{Sql, SqlList, SqlMaybeList};
 use postgres_parser::nodes::A_Expr;
 use postgres_parser::sys::A_Expr_Kind;
 use postgres_parser::Node;
@@ -8,6 +8,7 @@ impl Sql for A_Expr {
     fn sql(&self) -> String {
         let mut sql = String::new();
 
+        sql.push('(');
         match self.kind {
             A_Expr_Kind::AEXPR_OP => {
                 sql.push_str(&self.lexpr.sql());
@@ -51,7 +52,12 @@ impl Sql for A_Expr {
                 sql.push_str(&self.rexpr.sql());
                 sql.push(')');
             }
-            A_Expr_Kind::AEXPR_OF => panic!("what is AEXPR_OF?"),
+            A_Expr_Kind::AEXPR_OF => {
+                sql.push_str(&self.lexpr.sql());
+                sql.push_str(" IS OF (");
+                sql.push_str(&self.rexpr.sql_maybe_list(", "));
+                sql.push(')');
+            }
             A_Expr_Kind::AEXPR_IN => {
                 sql.push_str(&self.lexpr.sql());
                 sql.push_str(" IN (");
@@ -71,7 +77,12 @@ impl Sql for A_Expr {
             A_Expr_Kind::AEXPR_SIMILAR => {
                 sql.push_str(&self.lexpr.sql());
                 sql.push_str(" SIMILAR TO ");
-                sql.push_str(&self.rexpr.sql());
+
+                if let Node::FuncCall(func) = self.rexpr.as_ref().unwrap().as_ref() {
+                    sql.push_str(&func.args.sql(", "));
+                } else {
+                    sql.push_str(&self.rexpr.sql());
+                }
             }
             A_Expr_Kind::AEXPR_BETWEEN => {
                 sql.push_str(&self.lexpr.sql());
@@ -109,6 +120,7 @@ impl Sql for A_Expr {
                 sql.push_str(&self.lexpr.sql_wrap("(", ")"));
             }
         }
+        sql.push(')');
 
         sql
     }

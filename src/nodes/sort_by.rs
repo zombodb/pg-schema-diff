@@ -1,7 +1,7 @@
 use crate::make_operator_name;
 use crate::schema_set::Sql;
 use postgres_parser::nodes::SortBy;
-use postgres_parser::sys::{SortByDir, SortByNulls};
+use postgres_parser::sys::SortByDir;
 
 impl Sql for SortBy {
     fn sql(&self) -> String {
@@ -22,11 +22,7 @@ impl Sql for SortBy {
             }
         }
 
-        match self.sortby_nulls {
-            SortByNulls::SORTBY_NULLS_DEFAULT => { /* noop */ }
-            SortByNulls::SORTBY_NULLS_FIRST => sql.push_str(" NULLS FIRST"),
-            SortByNulls::SORTBY_NULLS_LAST => sql.push_str(" NULLS LAST"),
-        }
+        sql.push_str(&self.sortby_nulls.sql_prefix(" "));
 
         sql
     }

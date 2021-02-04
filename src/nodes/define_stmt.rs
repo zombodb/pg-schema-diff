@@ -15,30 +15,45 @@ impl Sql for DefineStmt {
         sql.push(' ');
         sql.push_str(&self.defnames.sql("."));
 
-        if self.args.len() > 0 {
-            if self.kind != ObjectType::OBJECT_AGGREGATE {
-                sql.push_str(" AS ");
+        match self.kind {
+            ObjectType::OBJECT_AGGREGATE if !self.oldstyle => {
+                sql.push('(');
+                let args = self.args.as_ref().unwrap().get(0).cloned().unwrap();
+                sql.push_str(&args.sql_maybe_list(", "));
+                sql.push(')');
             }
-
-            match self.kind {
-                ObjectType::OBJECT_AGGREGATE if !self.oldstyle => {
-                    sql.push('(');
-                    let args = self.args.as_ref().unwrap().get(0).cloned().unwrap();
-                    sql.push_str(&args.sql_maybe_list(", "));
-                    sql.push(')');
-                }
-                _ => {
-                    sql.push('(');
-                    sql.push_str(&self.args.sql(", "));
-                    sql.push(')');
+            ObjectType::OBJECT_COLLATION => {
+                if self.definition.len() == 1 {
+                    if let Node::DefElem(defelem) =
+                        self.definition.as_ref().unwrap().get(0).unwrap()
+                    {
+                        if defelem.defname == Some("from".into()) {
+                            sql.push(' ');
+                            sql.push_str(&defelem.sql())
+                        } else {
+                            sql.push('(');
+                            sql.push_str(&self.definition.sql_prefix(" ", ", "));
+                            sql.push(')');
+                        }
+                    } else {
+                        panic!(
+                            "unexpected DefineStmt::definition node: {:#?}",
+                            self.definition
+                        );
+                    }
+                } else {
+                    sql.push_str(&self.definition.sql_prefix_and_wrap(" ", "(", ")", ", "));
                 }
             }
-        }
+            _ => {
+                if self.kind != ObjectType::OBJECT_AGGREGATE {
+                    sql.push_str(" AS ");
+                }
 
-        if self.definition.len() > 0 {
-            sql.push('(');
-            sql.push_str(&self.definition.sql(", "));
-            sql.push(')');
+                sql.push('(');
+                sql.push_str(&self.args.sql(", "));
+                sql.push(')');
+            }
         }
 
         sql

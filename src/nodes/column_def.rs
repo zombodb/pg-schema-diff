@@ -10,6 +10,7 @@ impl Sql for ColumnDef {
         sql.push(' ');
         sql.push_str(&self.typeName.sql());
 
+        sql.push_str(&self.collClause.sql());
         for constraint in self.constraints.as_ref().unwrap_or(&EMPTY_NODE_VEC) {
             sql.push(' ');
             sql.push_str(&constraint.sql());

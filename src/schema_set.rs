@@ -4,6 +4,7 @@ use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 use colored::Colorize;
 use indexmap::set::IndexSet;
 use std::hash::{Hash, Hasher};
+use std::panic::{catch_unwind, RefUnwindSafe};
 
 pub struct DiffableStatement {
     sql: String,
@@ -25,6 +26,8 @@ impl PartialEq for DiffableStatement {
             .eq(&other.differ.name(&other.sql))
     }
 }
+
+impl RefUnwindSafe for DiffableStatement {}
 
 impl DiffableStatement {
     fn new(sql: &str, node: Node, differ: impl Diff + 'static) -> Self {
@@ -113,6 +116,13 @@ impl<T: Sql> Sql for Option<Box<T>> {
         }
     }
 
+    fn sql_wrap(&self, pre: &str, post: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(boxed_sql) => boxed_sql.sql_wrap(pre, post),
+        }
+    }
+
     fn sql_prefix_and_wrap(&self, pre: &str, start: &str, end: &str) -> String {
         match self {
             None => String::new(),
@@ -172,6 +182,68 @@ impl SqlIdent for Option<Vec<Node>> {
     }
 }
 
+impl SqlIdent for Vec<Node> {
+    #[track_caller]
+    fn sql_ident(&self) -> String {
+        make_name(&Some(self.clone())).expect("unable to make SqlIdent")
+    }
+
+    #[track_caller]
+    fn sql_ident_prefix(&self, pre: &str) -> String {
+        format!("{}{}", pre, self.sql_ident())
+    }
+
+    #[track_caller]
+    fn sql_ident_suffix(&self, suf: &str) -> String {
+        format!("{}{}", self.sql_ident(), suf)
+    }
+}
+
+impl SqlIdent for Option<Box<Node>> {
+    #[track_caller]
+    fn sql_ident(&self) -> String {
+        match self {
+            None => String::new(),
+            Some(node) => {
+                make_name(&Some(vec![node.as_ref().clone()])).expect("unable to make SqlIdent")
+            }
+        }
+    }
+
+    #[track_caller]
+    fn sql_ident_prefix(&self, pre: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}", pre, self.sql_ident()),
+        }
+    }
+
+    #[track_caller]
+    fn sql_ident_suffix(&self, suf: &str) -> String {
+        match self {
+            None => String::new(),
+            Some(_) => format!("{}{}", self.sql_ident(), suf),
+        }
+    }
+}
+
+impl SqlIdent for Node {
+    #[track_caller]
+    fn sql_ident(&self) -> String {
+        make_name(&Some(vec![self.clone()])).expect("unable to make SqlIdent")
+    }
+
+    #[track_caller]
+    fn sql_ident_prefix(&self, pre: &str) -> String {
+        format!("{}{}", pre, self.sql_ident())
+    }
+
+    #[track_caller]
+    fn sql_ident_suffix(&self, suf: &str) -> String {
+        format!("{}{}", suf, self.sql_ident())
+    }
+}
+
 pub trait Len {
     fn len(&self) -> usize;
     fn is_empty(&self) -> bool {
@@ -214,39 +286,51 @@ impl SchemaSet {
         }
 
         match node.clone() {
-            Node::CreateFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CreateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::DeleteStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::InsertStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::SelectStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::UpdateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::DoStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CreateSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::GrantStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::GrantRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterCollationStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterObjectSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterOwnerStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterTableStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ClusterStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CommentStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CompositeTypeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CopyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateAmStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateCastStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateDomainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateEnumStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::DefineStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CreateCastStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CreateAmStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateOpClassStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::ViewStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::VariableSetStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::VariableShowStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::TransactionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::DiscardStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::DeclareCursorStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::PrepareStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::ListenStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateRangeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateTableAsStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DeclareCursorStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DefineStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DeleteStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DiscardStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::DoStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DropRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DropStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::AlterFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::ExplainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CopyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::GrantRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::GrantStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::IndexStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::CompositeTypeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
-            Node::AlterTableStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::InsertStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ListenStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::NotifyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::PrepareStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::RenameStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::SelectStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::TransactionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::TruncateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::UnlistenStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::UpdateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::VacuumStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::VariableSetStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::VariableShowStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::ViewStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
 
             _ => panic!("unknown node: {:?}\n\n{}", node, sql),
         };
@@ -277,7 +361,17 @@ impl SchemaSet {
         let mut sql = String::new();
 
         for node in &self.nodes {
-            let deparsed = node.node.sql();
+            if let Node::AlterTableStmt(_) = &node.node {
+                println!("skipping AlterTableStmt");
+                continue;
+            }
+            // println!("{}", node.sql);
+            let deparsed = match catch_unwind(|| node.node.sql()) {
+                Ok(deparsed) => deparsed,
+                Err(e) => {
+                    panic!("{:?}\nsql=\n{}\nnode={:#?}", e, node.sql, node.node)
+                }
+            };
             let reparsed = parse_query(&deparsed).unwrap_or_else(|e| {
                 panic!(
                     "FAILED TO REPARSE:\n{:#?}\n{:#?}\nORIG:\n   {}\nNEW:\n   {};",

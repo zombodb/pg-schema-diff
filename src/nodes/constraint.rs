@@ -53,15 +53,8 @@ impl Sql for Constraint {
                 sql.push_str(" STORED");
             }
             ConstrType::CONSTR_UNIQUE => {
-                sql.push_str("UNIQUE ");
-                sql.push('(');
-                sql.push_str(
-                    &make_individual_names(&self.keys)
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                );
-                sql.push(')');
+                sql.push_str("UNIQUE");
+                sql.push_str(&self.keys.sql_wrap(", ", "(", ")"));
                 sql.push_str(
                     &self
                         .including
@@ -88,25 +81,32 @@ impl Sql for Constraint {
                 }
             }
             ConstrType::CONSTR_FOREIGN => {
-                sql.push_str("FOREIGN KEY ");
-                sql.push('(');
-                sql.push_str(
-                    &make_individual_names(&self.fk_attrs)
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                );
-                sql.push(')');
+                sql.push_str(&self.conname.sql_ident_prefix("CONSTRAINT "));
+
+                if self.fk_attrs.is_some() {
+                    sql.push_str(" FOREIGN KEY ");
+                    sql.push('(');
+                    sql.push_str(
+                        &make_individual_names(&self.fk_attrs)
+                            .into_iter()
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    );
+                    sql.push(')');
+                }
 
                 sql.push_str(" REFERENCES ");
-                sql.push('(');
-                sql.push_str(
-                    &make_individual_names(&self.pk_attrs)
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                );
-                sql.push(')');
+                sql.push_str(&self.pktable.sql());
+                if self.pk_attrs.is_some() {
+                    sql.push('(');
+                    sql.push_str(
+                        &make_individual_names(&self.pk_attrs)
+                            .into_iter()
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    );
+                    sql.push(')');
+                }
 
                 match self.fk_matchtype {
                     'f' => sql.push_str(" MATCH FULL"),
@@ -137,18 +137,6 @@ impl Sql for Constraint {
                     'n' => sql.push_str(" ON UPDATE SET NULL"),
                     'd' => sql.push_str(" ON UPDATE SET DEFAULT"),
                     _ => {}
-                }
-
-                if self.deferrable {
-                    sql.push_str(" DEFERRABLE");
-                } else {
-                    sql.push_str(" NOT DEFERRABLE");
-                }
-
-                if self.initdeferred {
-                    sql.push_str(" INITIALLY DEFERRED");
-                } else {
-                    sql.push_str(" INITIALLY IMMEDIATE");
                 }
             }
             _ => unimplemented!("{:?}", self.contype),

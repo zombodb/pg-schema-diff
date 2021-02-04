@@ -1,5 +1,5 @@
-use crate::get_bool_value;
 use crate::schema_set::Sql;
+use crate::{get_bool_value, make_name};
 use postgres_parser::nodes::DefElem;
 use postgres_parser::Node;
 
@@ -32,7 +32,11 @@ impl Sql for DefElem {
             "set" => {
                 sql.push_str(&self.arg.sql());
             }
-            "parallel" => sql.push_str(&format!("PARALLEL {}", self.arg.sql())),
+            "parallel" => sql.push_str(&format!(
+                "PARALLEL{}{}",
+                separator(&self.arg.as_ref().unwrap()),
+                self.arg.sql()
+            )),
             "cost" => sql.push_str(&format!("COST {}", self.arg.sql())),
             "rows" => sql.push_str(&format!("ROWS {}", self.arg.sql())),
             "start" => sql.push_str(&format!("START WITH {}", &self.arg.sql())),
@@ -49,6 +53,27 @@ impl Sql for DefElem {
             "sfunc" => sql.push_str(&format!("SFUNC = {}", self.arg.sql())),
             "finalfunc" => sql.push_str(&format!("FINALFUNC = {}", self.arg.sql())),
             "initcond" => sql.push_str(&format!("INITCOND = '{}'", self.arg.sql())),
+            "transaction_isolation" => {
+                sql.push_str("ISOLATION LEVEL ");
+                match self.arg.as_ref().unwrap().as_ref() {
+                    Node::A_Const(a_const) => sql.push_str(&a_const.val.sql().to_uppercase()),
+                    _ => panic!("unsupported arg node type for transaction_isolation"),
+                }
+            }
+            "transaction_deferrable" => match self.arg.as_ref().unwrap().as_ref() {
+                Node::A_Const(a_const) => {
+                    if a_const.val.int.unwrap_or(1) == 1 {
+                        sql.push_str(" DEFERRABLE");
+                    } else {
+                        sql.push_str(" NOT DEFERRABLE");
+                    }
+                }
+                _ => panic!("unsupported arg node type for transaction_deferrable"),
+            },
+            "autovacuum_enabled" => {
+                sql.push_str(&format!("autovacuum_enabled = {}", self.arg.sql()))
+            }
+            "deduplicate_items" => sql.push_str(&format!("deduplicate_items = {}", self.arg.sql())),
 
             "as" if self.arg.is_some() => {
                 let unboxed = self.arg.as_ref().unwrap();
@@ -66,9 +91,39 @@ impl Sql for DefElem {
                     sql.push_str(&self.arg.sql());
                 }
             }
+
+            "from" => {
+                if let Node::List(list) = self.arg.as_ref().unwrap().as_ref() {
+                    sql.push_str(&format!("FROM {}", make_name(&Some(list.clone())).unwrap()));
+                } else {
+                    panic!("unexpected node type for 'from' DefElem")
+                }
+            }
+
+            "provider" => sql.push_str(&format!("provider = {}", self.arg.sql())),
+            "collation" => sql.push_str(&format!("collation = {}", self.arg.sql())),
+            "subtype" => sql.push_str(&format!("subtype = {}", self.arg.sql())),
+            "locale" => sql.push_str(&format!("locale = '{}'", self.arg.sql())),
+            "lc_ctype" => sql.push_str(&format!("lc_ctype = {}", self.arg.sql())),
+            "lc_collate" => sql.push_str(&format!("lc_collate = {}", self.arg.sql())),
+
             key => {
                 if self.arg.is_some() {
-                    sql.push_str(&format!("{} = {}", key, scalar(self.arg.sql())))
+                    let arg_sql = self.arg.sql();
+
+                    let uppercase_cnt = key.chars().filter(|c| c.is_uppercase()).count();
+
+                    let key = if uppercase_cnt > 0 {
+                        format!("\"{}\"", key)
+                    } else {
+                        key.into()
+                    };
+
+                    if arg_sql.starts_with('"') && arg_sql.ends_with('"') {
+                        sql.push_str(&format!("{} = {}", key, arg_sql))
+                    } else {
+                        sql.push_str(&format!("{} = {}", key, scalar(arg_sql)))
+                    }
                 } else {
                     sql.push_str(key)
                 }
@@ -106,4 +161,14 @@ fn scalar(input: String) -> String {
     }
 
     input
+}
+
+fn separator(input: &Node) -> &'static str {
+    if let Node::Value(_) = input {
+        " "
+    } else if let Node::TypeName(_) = input {
+        " = "
+    } else {
+        panic!("cannot determine separator")
+    }
 }

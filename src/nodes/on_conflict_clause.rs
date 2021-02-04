@@ -1,4 +1,4 @@
-use crate::schema_set::{Sql, SqlIdent};
+use crate::schema_set::{Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::OnConflictClause;
 use postgres_parser::sys::OnConflictAction;
 use postgres_parser::Node;
@@ -33,6 +33,9 @@ impl Sql for OnConflictClause {
                                     sql.push_str(", ");
                                 }
                                 sql.push_str(&res_target.name.sql_ident());
+                                sql.push_str(
+                                    &res_target.indirection.sql_wrap_each(Some("["), Some("]")),
+                                );
                                 sql.push_str(" = ");
                                 sql.push_str(&res_target.val.sql());
                                 i += 1;

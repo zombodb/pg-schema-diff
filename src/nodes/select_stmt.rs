@@ -2,6 +2,7 @@ use crate::nodes::res_target::res_target_select;
 use crate::schema_set::{Diff, Sql, SqlList};
 
 use postgres_parser::nodes::SelectStmt;
+use postgres_parser::sys::SetOperation;
 use postgres_parser::Node;
 
 impl Diff for SelectStmt {
@@ -26,6 +27,9 @@ impl Sql for SelectStmt {
         if let Some(values_list) = self.valuesLists.as_ref() {
             sql.push_str("VALUES ");
             sql.push_str(&values_list.sql_wrap_each_and_separate(", ", "(", ")"));
+        } else if self.larg.is_some() {
+            sql.push_str(&self.larg.sql());
+            sql.push(' ');
         } else {
             sql.push_str("SELECT ");
             sql.push_str(&self.distinctClause.sql_prefix(" DISTINCT ", ", "));
@@ -38,18 +42,23 @@ impl Sql for SelectStmt {
             sql.push_str(&self.windowClause.sql_prefix(" WINDOW ", ", "));
         }
 
+        match self.op {
+            SetOperation::SETOP_NONE => {}
+            SetOperation::SETOP_UNION => sql.push_str("UNION "),
+            SetOperation::SETOP_INTERSECT => sql.push_str("INTERSECT "),
+            SetOperation::SETOP_EXCEPT => sql.push_str("EXCEPT "),
+        }
+
+        if self.all {
+            sql.push_str("ALL ");
+        }
+
+        sql.push_str(&self.rarg.sql_wrap("(", ")"));
+
         sql.push_str(&self.sortClause.sql_prefix(" ORDER BY ", ", "));
         sql.push_str(&self.limitCount.sql_prefix(" LIMIT "));
         sql.push_str(&self.limitOffset.sql_prefix(" OFFSET "));
         sql.push_str(&self.lockingClause.sql(""));
-
-        //  not sure what to do about these?
-        if self.larg.is_some() {
-            unimplemented!("'larg' of SelectStmt")
-        }
-        if self.rarg.is_some() {
-            unimplemented!("'rarg' of SelectStmt")
-        }
 
         sql
     }

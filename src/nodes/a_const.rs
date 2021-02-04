@@ -16,8 +16,10 @@ impl Sql for A_Const {
         } else if let Some(f) = self.val.float.as_ref() {
             sql.push_str(f);
         } else if let Some(b) = self.val.bit_string.as_ref() {
+            let bitstring = &b[1..];
+            sql.push('B');
             sql.push('\'');
-            sql.push_str(b);
+            sql.push_str(bitstring);
             sql.push('\'');
         }
 

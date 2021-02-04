@@ -15,8 +15,7 @@ impl Sql for CaseExpr {
         sql.push(' ');
         sql.push_str(&self.args.sql(" "));
 
-        sql.push_str(" ELSE ");
-        sql.push_str(&self.defresult.sql());
+        sql.push_str(&self.defresult.sql_prefix(" ELSE "));
         sql.push_str(" END");
 
         sql

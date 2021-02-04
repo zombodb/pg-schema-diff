@@ -6,6 +6,7 @@ impl Sql for TypeCast {
         let mut sql = String::new();
 
         sql.push('(');
+        sql.push('(');
         sql.push_str(
             &self
                 .arg
@@ -17,6 +18,7 @@ impl Sql for TypeCast {
         sql.push(')');
         sql.push_str("::");
         sql.push_str(&self.typeName.sql());
+        sql.push(')');
 
         sql
     }

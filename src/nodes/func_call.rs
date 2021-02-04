@@ -23,6 +23,7 @@ impl Sql for FuncCall {
         }
         sql.push_str(&self.agg_order.sql_prefix(" ORDER BY ", ", "));
         sql.push(')');
+        sql.push_str(&self.over.sql_prefix(" OVER"));
         sql.push_str(
             &self
                 .agg_filter

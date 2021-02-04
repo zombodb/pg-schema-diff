@@ -10,6 +10,9 @@ impl Sql for RangeFunction {
         }
 
         sql.push_str(&self.functions.sql(", "));
+        if self.ordinality {
+            sql.push_str("WITH ORDINALITY ");
+        }
         sql.push_str(&self.alias.sql());
 
         sql

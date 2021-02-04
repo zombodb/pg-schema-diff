@@ -39,6 +39,7 @@ impl Sql for CreateStmt {
         }
         sql.push_str(&self.partspec.sql_prefix(" PARTITION BY "));
 
+        sql.push_str(&self.options.sql_prefix_and_wrap(" WITH ", "(", ")", ", "));
         sql.push_str(&self.oncommit.sql_prefix(" "));
 
         sql

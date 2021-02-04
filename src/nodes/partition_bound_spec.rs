@@ -8,7 +8,13 @@ impl Sql for PartitionBoundSpec {
         sql.push_str("FOR VALUES ");
         match self.strategy {
             'h' => {
-                unimplemented!("TODO:  PartitionBoundSpec::strategy `h`")
+                sql.push_str("WITH (");
+                sql.push_str("MODULUS ");
+                sql.push_str(&self.modulus.to_string());
+                sql.push_str(", ");
+                sql.push_str("REMAINDER ");
+                sql.push_str(&self.remainder.to_string());
+                sql.push(')');
             }
 
             'l' => {
@@ -16,7 +22,12 @@ impl Sql for PartitionBoundSpec {
             }
 
             'r' => {
-                unimplemented!("TODO:  PartitionBoundSpec::strategy `r`")
+                sql.push_str("FROM (");
+                sql.push_str(&self.lowerdatums.sql(", "));
+                sql.push(')');
+                sql.push_str(" TO (");
+                sql.push_str(&self.upperdatums.sql(", "));
+                sql.push(')');
             }
 
             _ => panic!(
