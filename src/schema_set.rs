@@ -297,15 +297,18 @@ impl SchemaSet {
             Node::CopyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateAmStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateCastStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateConversionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateDomainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateEnumStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateFunctionStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateOpClassStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreatePolicyStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateRangeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CreateTableAsStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateTrigStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DeclareCursorStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DefineStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DeleteStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
@@ -314,6 +317,7 @@ impl SchemaSet {
             Node::DropRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::DropStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::ExplainStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::FetchStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::GrantRoleStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::GrantStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::IndexStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
@@ -369,7 +373,12 @@ impl SchemaSet {
             let deparsed = match catch_unwind(|| node.node.sql()) {
                 Ok(deparsed) => deparsed,
                 Err(e) => {
-                    panic!("{:?}\nsql=\n{}\nnode={:#?}", e, node.sql, node.node)
+                    panic!(
+                        "{:?}\n\n\nnode=\n{:#?}\nsql={}",
+                        e,
+                        node.node,
+                        node.sql.trim(),
+                    )
                 }
             };
             let reparsed = parse_query(&deparsed).unwrap_or_else(|e| {

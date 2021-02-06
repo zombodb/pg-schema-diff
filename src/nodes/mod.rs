@@ -32,16 +32,19 @@ mod constraint;
 mod copy_stmt;
 mod create_am_stmt;
 mod create_cast_stmt;
+mod create_conversion_stmt;
 mod create_domain_stmt;
 mod create_enum_stmt;
 mod create_function_stmt;
 mod create_op_class_item;
 mod create_op_class_stmt;
+mod create_policy_stmt;
 mod create_range_stmt;
 mod create_role_stmt;
 mod create_schema_stmt;
 mod create_stmt;
 mod create_table_as_stmt;
+mod create_trig_stmt;
 mod current_of_expr;
 mod declare_cursor_stmt;
 mod def_elem;
@@ -53,6 +56,7 @@ mod drop_behavior;
 mod drop_role_stmt;
 mod drop_stmt;
 mod explain_stmt;
+mod fetch_stmt;
 mod func_call;
 mod function_parameter;
 mod grant_role_stmt;
@@ -143,13 +147,16 @@ impl Sql for Node {
             Node::CopyStmt(stmt) => stmt.sql(),
             Node::CreateAmStmt(stmt) => stmt.sql(),
             Node::CreateCastStmt(stmt) => stmt.sql(),
+            Node::CreateConversionStmt(stmt) => stmt.sql(),
             Node::CreateDomainStmt(stmt) => stmt.sql(),
             Node::CreateEnumStmt(stmt) => stmt.sql(),
             Node::CreateFunctionStmt(stmt) => stmt.sql(),
             Node::CreateOpClassItem(stmt) => stmt.sql(),
             Node::CreateOpClassStmt(stmt) => stmt.sql(),
+            Node::CreatePolicyStmt(stmt) => stmt.sql(),
             Node::CreateRangeStmt(stmt) => stmt.sql(),
             Node::CreateRoleStmt(stmt) => stmt.sql(),
+            Node::CreateTrigStmt(stmt) => stmt.sql(),
             Node::CreateSchemaStmt(stmt) => stmt.sql(),
             Node::CreateStmt(stmt) => stmt.sql(),
             Node::CreateTableAsStmt(stmt) => stmt.sql(),
@@ -164,6 +171,7 @@ impl Sql for Node {
             Node::DropStmt(stmt) => stmt.sql(),
             Node::ExplainStmt(node) => node.sql(),
             Node::Expr(node) => node.sql(),
+            Node::FetchStmt(stmt) => stmt.sql(),
             Node::FuncCall(stmt) => stmt.sql(),
             Node::FunctionParameter(stmt) => stmt.sql(),
             Node::GrantRoleStmt(stmt) => stmt.sql(),

@@ -10,9 +10,14 @@ impl Sql for CommentStmt {
         sql.push(' ');
         sql.push_str(&self.object.sql_maybe_list("."));
         sql.push_str(" IS ");
-        sql.push_str("'");
-        sql.push_str(&self.comment.as_ref().unwrap().replace("'", "''"));
-        sql.push_str("'");
+
+        if self.comment.is_some() {
+            sql.push_str("'");
+            sql.push_str(&self.comment.as_ref().unwrap().replace("'", "''"));
+            sql.push_str("'");
+        } else {
+            sql.push_str("NULL");
+        }
 
         sql
     }

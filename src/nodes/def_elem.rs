@@ -45,7 +45,13 @@ impl Sql for DefElem {
             "leftarg" => sql.push_str(&format!("LEFTARG = {}", self.arg.sql())),
             "rightarg" => sql.push_str(&format!("RIGHTARG = {}", self.arg.sql())),
 
-            "null" => sql.push_str(&format!("NULL {}", scalar(self.arg.sql()))),
+            "null" => {
+                if self.arg.is_some() {
+                    sql.push_str(&format!("NULL {}", scalar(self.arg.sql())))
+                } else {
+                    sql.push_str("NULL ''");
+                }
+            }
 
             "costs" => sql.push_str(&format!("COSTS {}", scalar(self.arg.sql()))),
 
@@ -100,12 +106,36 @@ impl Sql for DefElem {
                 }
             }
 
+            "delimiter" => sql.push_str(&format!(
+                "delimiter '{}'",
+                self.arg.sql().replace("'", "''")
+            )),
+
             "provider" => sql.push_str(&format!("provider = {}", self.arg.sql())),
             "collation" => sql.push_str(&format!("collation = {}", self.arg.sql())),
             "subtype" => sql.push_str(&format!("subtype = {}", self.arg.sql())),
             "locale" => sql.push_str(&format!("locale = '{}'", self.arg.sql())),
             "lc_ctype" => sql.push_str(&format!("lc_ctype = {}", self.arg.sql())),
             "lc_collate" => sql.push_str(&format!("lc_collate = {}", self.arg.sql())),
+
+            "createdb" => {
+                if let Node::Value(value) = self.arg.as_ref().unwrap().as_ref() {
+                    if value.int.unwrap_or_default() == 0 {
+                        sql.push_str("NOCREATEDB");
+                    } else {
+                        sql.push_str("CREATEDB");
+                    }
+                }
+            }
+            "createrole" => {
+                if let Node::Value(value) = self.arg.as_ref().unwrap().as_ref() {
+                    if value.int.unwrap_or_default() == 0 {
+                        sql.push_str("NOCREATEROLE");
+                    } else {
+                        sql.push_str("CREATEROLE");
+                    }
+                }
+            }
 
             key => {
                 if self.arg.is_some() {
