@@ -1,5 +1,6 @@
 use crate::schema_set::{Diff, Sql, SqlIdent};
 use postgres_parser::nodes::DropStmt;
+use postgres_parser::sys::ObjectType;
 use postgres_parser::Node;
 
 impl Sql for DropStmt {
@@ -16,16 +17,30 @@ impl Sql for DropStmt {
             sql.push_str("IF EXISTS ");
         }
 
-        for (i, node) in self.objects.as_ref().unwrap().iter().enumerate() {
-            if i > 0 {
-                sql.push_str(", ");
+        match self.removeType {
+            ObjectType::OBJECT_RULE => {
+                let objects = self.objects.as_ref().unwrap();
+                if let Node::List(objects) = objects.get(0).as_ref().unwrap() {
+                    let tablename = objects.get(0).unwrap();
+                    let rulename = objects.get(1).unwrap();
+                    sql.push_str(&rulename.sql_ident());
+                    sql.push_str(" ON ");
+                    sql.push_str(&tablename.sql_ident());
+                }
             }
-            if let Node::List(names) = node {
-                sql.push_str(&names.sql_ident());
-            } else if let Node::Value(_) = node {
-                sql.push_str(&node.sql_ident());
-            } else {
-                sql.push_str(&node.sql());
+            _ => {
+                for (i, node) in self.objects.as_ref().unwrap().iter().enumerate() {
+                    if i > 0 {
+                        sql.push_str(", ");
+                    }
+                    if let Node::List(names) = node {
+                        sql.push_str(&names.sql_ident());
+                    } else if let Node::Value(_) = node {
+                        sql.push_str(&node.sql_ident());
+                    } else {
+                        sql.push_str(&node.sql());
+                    }
+                }
             }
         }
 

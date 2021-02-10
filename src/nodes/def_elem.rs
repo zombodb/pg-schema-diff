@@ -1,4 +1,4 @@
-use crate::schema_set::Sql;
+use crate::schema_set::{Sql, SqlMaybeList};
 use crate::{get_bool_value, make_name};
 use postgres_parser::nodes::DefElem;
 use postgres_parser::Node;
@@ -47,11 +47,33 @@ impl Sql for DefElem {
 
             "null" => {
                 if self.arg.is_some() {
-                    sql.push_str(&format!("NULL {}", scalar(self.arg.sql())))
+                    let arg = self.arg.sql();
+                    if arg.len() == 0 {
+                        sql.push_str("NULL ''");
+                    } else {
+                        sql.push_str(&format!("NULL '{}'", arg));
+                    }
                 } else {
                     sql.push_str("NULL ''");
                 }
             }
+            "header" => sql.push_str(&format!("HEADER {}", scalar(self.arg.sql()))),
+            "encoding" => sql.push_str(&format!("ENCODING {}", scalar(self.arg.sql()))),
+            "format" => sql.push_str(&format!("FORMAT {}", scalar(self.arg.sql()))),
+            "freeze" => sql.push_str(&format!("FREEZE {}", scalar(self.arg.sql()))),
+
+            "force_quote" => {
+                sql.push_str(&format!("FORCE_QUOTE ({})", self.arg.sql_maybe_list(", ")))
+            }
+
+            "force_null" => {
+                sql.push_str(&format!("FORCE_NULL ({})", self.arg.sql_maybe_list(", ")))
+            }
+
+            "force_not_null" => sql.push_str(&format!(
+                "FORCE_NOT_NULL ({})",
+                self.arg.sql_maybe_list(", ")
+            )),
 
             "costs" => sql.push_str(&format!("COSTS {}", scalar(self.arg.sql()))),
 

@@ -20,6 +20,7 @@ mod boolean_test;
 mod case_expr;
 mod case_when;
 mod cluster_stmt;
+mod cmd_type;
 mod coalesce_expr;
 mod coercion_context;
 mod collate_clause;
@@ -35,6 +36,9 @@ mod create_cast_stmt;
 mod create_conversion_stmt;
 mod create_domain_stmt;
 mod create_enum_stmt;
+mod create_fdw_stmt;
+mod create_foreign_server_stmt;
+mod create_foreign_table_stmt;
 mod create_function_stmt;
 mod create_op_class_item;
 mod create_op_class_stmt;
@@ -42,6 +46,7 @@ mod create_policy_stmt;
 mod create_range_stmt;
 mod create_role_stmt;
 mod create_schema_stmt;
+mod create_seq_stmt;
 mod create_stmt;
 mod create_table_as_stmt;
 mod create_trig_stmt;
@@ -68,6 +73,7 @@ mod insert_stmt;
 mod into_clause;
 mod join_expr;
 mod listen_stmt;
+mod lock_stmt;
 mod locking_clause;
 mod min_max_expr;
 mod multi_assign_ref;
@@ -88,6 +94,7 @@ mod rename_stmt;
 mod res_target;
 mod role_spec;
 mod row_expr;
+mod rule_stmt;
 mod select_stmt;
 mod set_to_default;
 mod sort_by;
@@ -150,12 +157,16 @@ impl Sql for Node {
             Node::CreateConversionStmt(stmt) => stmt.sql(),
             Node::CreateDomainStmt(stmt) => stmt.sql(),
             Node::CreateEnumStmt(stmt) => stmt.sql(),
+            Node::CreateFdwStmt(stmt) => stmt.sql(),
+            Node::CreateForeignServerStmt(stmt) => stmt.sql(),
+            Node::CreateForeignTableStmt(stmt) => stmt.sql(),
             Node::CreateFunctionStmt(stmt) => stmt.sql(),
             Node::CreateOpClassItem(stmt) => stmt.sql(),
             Node::CreateOpClassStmt(stmt) => stmt.sql(),
             Node::CreatePolicyStmt(stmt) => stmt.sql(),
             Node::CreateRangeStmt(stmt) => stmt.sql(),
             Node::CreateRoleStmt(stmt) => stmt.sql(),
+            Node::CreateSeqStmt(stmt) => stmt.sql(),
             Node::CreateTrigStmt(stmt) => stmt.sql(),
             Node::CreateSchemaStmt(stmt) => stmt.sql(),
             Node::CreateStmt(stmt) => stmt.sql(),
@@ -184,6 +195,7 @@ impl Sql for Node {
             Node::JoinExpr(stmt) => stmt.sql(),
             Node::List(_) => unreachable!("encountered a List node"),
             Node::ListenStmt(stmt) => stmt.sql(),
+            Node::LockStmt(stmt) => stmt.sql(),
             Node::LockingClause(stmt) => stmt.sql(),
             Node::MultiAssignRef(stmt) => stmt.sql(),
             Node::NotifyStmt(stmt) => stmt.sql(),
@@ -201,6 +213,7 @@ impl Sql for Node {
             Node::RenameStmt(stmt) => stmt.sql(),
             Node::ResTarget(_) => unreachable!("encountered a ResTarget node"),
             Node::RoleSpec(stmt) => stmt.sql(),
+            Node::RuleStmt(stmt) => stmt.sql(),
             Node::RowExpr(stmt) => stmt.sql(),
             Node::SelectStmt(stmt) => stmt.sql(),
             Node::SetToDefault(stmt) => stmt.sql(),

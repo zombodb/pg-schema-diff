@@ -27,7 +27,7 @@ impl Sql for ObjectType {
             ObjectType::OBJECT_INDEX => "INDEX",
             ObjectType::OBJECT_LANGUAGE => "LANGUAGE",
             ObjectType::OBJECT_LARGEOBJECT => "LARGEOBJECT",
-            ObjectType::OBJECT_MATVIEW => "MATVIEW",
+            ObjectType::OBJECT_MATVIEW => "MATERIALIZED VIEW",
             ObjectType::OBJECT_OPCLASS => "OPCLASS",
             ObjectType::OBJECT_OPERATOR => "OPERATOR",
             ObjectType::OBJECT_OPFAMILY => "OPFAMILY",

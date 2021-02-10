@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::CreateTableAsStmt;
-use postgres_parser::sys::ObjectType;
 
 impl Sql for CreateTableAsStmt {
     fn sql(&self) -> String {
@@ -21,10 +20,9 @@ impl Sql for CreateTableAsStmt {
                 sql.push_str("TEMPORARY ");
             }
         }
-        match self.relkind {
-            ObjectType::OBJECT_TABLE => sql.push_str("TABLE "),
-            _ => unimplemented!("unsupported CreateTableAsStmt::relkind"),
-        }
+
+        sql.push_str(&self.relkind.sql());
+        sql.push(' ');
 
         if self.if_not_exists {
             sql.push_str("IF NOT EXISTS ");

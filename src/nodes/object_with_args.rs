@@ -6,10 +6,19 @@ impl Sql for ObjectWithArgs {
         let mut sql = String::new();
 
         sql.push_str(&self.objname.sql_ident());
-        if !self.args_unspecified {
-            sql.push('(');
-            sql.push_str(&self.objargs.sql(", "));
-            sql.push(')');
+
+        if !self.args_unspecified && self.objargs.is_none() {
+            // noop
+        } else {
+            if !self.args_unspecified {
+                sql.push('(');
+                if self.objargs.is_none() {
+                    sql.push('*');
+                } else {
+                    sql.push_str(&self.objargs.sql(", "));
+                }
+                sql.push(')');
+            }
         }
 
         sql

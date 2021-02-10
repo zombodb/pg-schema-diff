@@ -1,4 +1,4 @@
-use crate::schema_set::{Diff, Sql, SqlList};
+use crate::schema_set::{Diff, Sql, SqlIdent, SqlList};
 
 use postgres_parser::nodes::CreateStmt;
 use postgres_parser::Node;
@@ -38,7 +38,7 @@ impl Sql for CreateStmt {
             );
         }
         sql.push_str(&self.partspec.sql_prefix(" PARTITION BY "));
-
+        sql.push_str(&self.accessMethod.sql_ident_prefix(" USING "));
         sql.push_str(&self.options.sql_prefix_and_wrap(" WITH ", "(", ")", ", "));
         sql.push_str(&self.oncommit.sql_prefix(" "));
 
