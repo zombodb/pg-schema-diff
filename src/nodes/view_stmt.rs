@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Len, Sql, SqlList};
 use postgres_parser::nodes::ViewStmt;
-use postgres_parser::Node;
 
 impl Sql for ViewStmt {
     fn sql(&self) -> String {

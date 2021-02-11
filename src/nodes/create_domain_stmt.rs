@@ -1,7 +1,6 @@
 use crate::make_name;
 use crate::schema_set::{Diff, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::CreateDomainStmt;
-use postgres_parser::Node;
 
 impl Sql for CreateDomainStmt {
     fn sql(&self) -> String {

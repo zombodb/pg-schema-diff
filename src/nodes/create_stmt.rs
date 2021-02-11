@@ -1,7 +1,6 @@
 use crate::schema_set::{Diff, Sql, SqlIdent, SqlList};
 
 use postgres_parser::nodes::CreateStmt;
-use postgres_parser::Node;
 
 impl Sql for CreateStmt {
     fn sql(&self) -> String {

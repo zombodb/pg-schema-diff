@@ -1,7 +1,6 @@
 use crate::nodes::res_target::{res_target_insert, res_target_returning};
 use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::InsertStmt;
-use postgres_parser::Node;
 
 impl Sql for InsertStmt {
     fn sql(&self) -> String {

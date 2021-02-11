@@ -1,7 +1,6 @@
 use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::DiscardStmt;
 use postgres_parser::sys::DiscardMode;
-use postgres_parser::Node;
 
 impl Sql for DiscardMode {
     fn sql(&self) -> String {

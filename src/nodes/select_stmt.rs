@@ -3,7 +3,6 @@ use crate::schema_set::{Diff, Sql, SqlList};
 
 use postgres_parser::nodes::SelectStmt;
 use postgres_parser::sys::SetOperation;
-use postgres_parser::Node;
 
 impl Sql for SelectStmt {
     fn sql(&self) -> String {

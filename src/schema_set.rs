@@ -3,7 +3,7 @@ use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 
 use colored::Colorize;
 use std::borrow::Cow;
-use std::cmp::Ordering;
+
 use std::hash::{Hash, Hasher};
 use std::panic::{catch_unwind, RefUnwindSafe};
 

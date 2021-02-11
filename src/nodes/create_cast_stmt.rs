@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::CreateCastStmt;
-use postgres_parser::Node;
 
 impl Sql for CreateCastStmt {
     fn sql(&self) -> String {

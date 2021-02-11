@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::GrantRoleStmt;
-use postgres_parser::Node;
 
 impl Sql for GrantRoleStmt {
     fn sql(&self) -> String {

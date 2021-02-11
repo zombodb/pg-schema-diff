@@ -1,7 +1,6 @@
 use crate::schema_set::{Diff, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::TransactionStmt;
 use postgres_parser::sys::TransactionStmtKind;
-use postgres_parser::Node;
 
 impl Sql for TransactionStmt {
     fn sql(&self) -> String {

@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::CreateEnumStmt;
-use postgres_parser::Node;
 
 impl Sql for CreateEnumStmt {
     fn sql(&self) -> String {

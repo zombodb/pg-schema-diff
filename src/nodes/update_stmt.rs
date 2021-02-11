@@ -1,7 +1,6 @@
 use crate::nodes::res_target::{res_target_returning, res_target_update};
 use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::UpdateStmt;
-use postgres_parser::Node;
 
 impl Sql for UpdateStmt {
     fn sql(&self) -> String {

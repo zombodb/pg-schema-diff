@@ -1,7 +1,6 @@
 use crate::nodes::res_target::res_target_returning;
 use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::DeleteStmt;
-use postgres_parser::Node;
 
 impl Sql for DeleteStmt {
     fn sql(&self) -> String {
