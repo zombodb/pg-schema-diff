@@ -5,20 +5,6 @@ use postgres_parser::nodes::SelectStmt;
 use postgres_parser::sys::SetOperation;
 use postgres_parser::Node;
 
-impl Diff for SelectStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
-
 impl Sql for SelectStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
@@ -63,3 +49,5 @@ impl Sql for SelectStmt {
         sql
     }
 }
+
+impl Diff for SelectStmt {}

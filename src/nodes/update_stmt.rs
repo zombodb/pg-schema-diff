@@ -3,20 +3,6 @@ use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::UpdateStmt;
 use postgres_parser::Node;
 
-impl Diff for UpdateStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
-
 impl Sql for UpdateStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
@@ -43,3 +29,5 @@ impl Sql for UpdateStmt {
         sql
     }
 }
+
+impl Diff for UpdateStmt {}

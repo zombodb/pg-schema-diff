@@ -3,20 +3,6 @@ use crate::schema_set::{Diff, Sql};
 use postgres_parser::nodes::InsertStmt;
 use postgres_parser::Node;
 
-impl Diff for InsertStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
-
 impl Sql for InsertStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
@@ -42,3 +28,5 @@ impl Sql for InsertStmt {
         sql
     }
 }
+
+impl Diff for InsertStmt {}

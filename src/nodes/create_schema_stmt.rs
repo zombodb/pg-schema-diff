@@ -47,7 +47,7 @@ impl Diff for CreateSchemaStmt {
         sql
     }
 
-    fn name(&self, _sql: &str) -> String {
-        self.schemaname.clone().unwrap()
+    fn object_name(&self) -> Option<String> {
+        Some(self.schemaname.sql_ident())
     }
 }

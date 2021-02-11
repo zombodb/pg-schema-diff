@@ -99,7 +99,7 @@ impl Diff for CreateFunctionStmt {
         drop
     }
 
-    fn name(&self, _: &str) -> String {
-        make_name(&self.funcname).expect("unable to make name for CreateFunctionStatement")
+    fn object_name(&self) -> Option<String> {
+        Some(make_name(&self.funcname).expect("unable to make name for CreateFunctionStatement"))
     }
 }

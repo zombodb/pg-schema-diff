@@ -20,15 +20,7 @@ impl Sql for CreateDomainStmt {
 }
 
 impl Diff for CreateDomainStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, _sql: &str) -> String {
-        make_name(&self.domainname).expect("unable to make CreateDomainStmt::domainname")
+    fn object_name(&self) -> Option<String> {
+        Some(make_name(&self.domainname).expect("unable to make CreateDomainStmt::domainname"))
     }
 }

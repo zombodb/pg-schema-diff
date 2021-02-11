@@ -50,16 +50,4 @@ impl Sql for VariableSetStmt {
     }
 }
 
-impl Diff for VariableSetStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
+impl Diff for VariableSetStmt {}

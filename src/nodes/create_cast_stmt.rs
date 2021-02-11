@@ -29,16 +29,4 @@ impl Sql for CreateCastStmt {
     }
 }
 
-impl Diff for CreateCastStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
+impl Diff for CreateCastStmt {}

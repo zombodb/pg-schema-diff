@@ -54,16 +54,4 @@ impl Sql for TransactionStmt {
     }
 }
 
-impl Diff for TransactionStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
+impl Diff for TransactionStmt {}

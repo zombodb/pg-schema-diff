@@ -3,20 +3,6 @@ use crate::schema_set::{Diff, Sql, SqlList};
 use postgres_parser::nodes::DeleteStmt;
 use postgres_parser::Node;
 
-impl Diff for DeleteStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
-
 impl Sql for DeleteStmt {
     fn sql(&self) -> String {
         let mut sql = String::new();
@@ -31,3 +17,5 @@ impl Sql for DeleteStmt {
         sql
     }
 }
+
+impl Diff for DeleteStmt {}

@@ -8,27 +8,32 @@ static EMPTY_NODE_VEC: Vec<Node> = Vec::new();
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let a = args.get(1).expect("no a filename");
-    let b = args.get(2);
+    let command = args.get(1).expect("no command argument");
 
-    if b.is_none() {
-        let mut set = SchemaSet::new();
-        set.scan_file(&a);
-        let deparsed = set.deparse();
-        println!("{}", deparsed);
-    } else {
-        let b = b.unwrap();
-        let mut a_set = SchemaSet::new();
-        let mut b_set = SchemaSet::new();
+    match command.as_str() {
+        "deparse" => {
+            let filename = args.get(2).expect("noo filename argument");
+            let mut set = SchemaSet::new();
+            set.scan_file(&filename);
+            let deparsed = set.deparse();
+            println!("{}", deparsed);
+        }
 
-        a_set.scan_file(&a);
-        b_set.scan_file(&b);
+        "diff" => {
+            let a = args.get(2).expect("no a filename");
+            let b = args.get(3).expect("no b filename");
 
-        // let diff = b_set.diff(&mut a_set);
-        // println!("{}", diff);
+            let mut a_set = SchemaSet::new();
+            let mut b_set = SchemaSet::new();
 
-        let differences = b_set.diff(&a_set);
-        println!("{}", differences);
+            a_set.scan_file(&a);
+            b_set.scan_file(&b);
+
+            let differences = a_set.diff(&b_set);
+            println!("{}", differences);
+        }
+
+        unknown => panic!("unrecognized command argument: {}", unknown),
     }
 }
 

@@ -30,7 +30,7 @@ impl Diff for CreateAmStmt {
         unimplemented!()
     }
 
-    fn name(&self, _sql: &str) -> String {
-        self.amname.sql_ident()
+    fn object_name(&self) -> Option<String> {
+        Some(self.amname.sql_ident())
     }
 }

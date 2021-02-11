@@ -154,15 +154,7 @@ impl Sql for DefineStmt {
 }
 
 impl Diff for DefineStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, _sql: &str) -> String {
-        self.defnames.sql_ident()
+    fn object_name(&self) -> Option<String> {
+        Some(self.defnames.sql_ident())
     }
 }

@@ -47,15 +47,7 @@ impl Sql for CreateStmt {
 }
 
 impl Diff for CreateStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, _: &str) -> String {
-        self.relation.as_ref().unwrap().sql()
+    fn object_name(&self) -> Option<String> {
+        Some(self.relation.sql())
     }
 }

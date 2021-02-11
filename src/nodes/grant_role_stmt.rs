@@ -22,16 +22,4 @@ impl Sql for GrantRoleStmt {
     }
 }
 
-impl Diff for GrantRoleStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, sql: &str) -> String {
-        sql.into()
-    }
-}
+impl Diff for GrantRoleStmt {}

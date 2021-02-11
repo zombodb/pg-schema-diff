@@ -25,15 +25,7 @@ impl Sql for CreateOpClassStmt {
 }
 
 impl Diff for CreateOpClassStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
-    fn name(&self, _sql: &str) -> String {
-        self.opclassname.sql_ident()
+    fn object_name(&self) -> Option<String> {
+        Some(self.opclassname.sql_ident())
     }
 }

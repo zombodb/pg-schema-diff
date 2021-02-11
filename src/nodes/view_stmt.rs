@@ -27,20 +27,7 @@ impl Sql for ViewStmt {
 }
 
 impl Diff for ViewStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
-    }
-
-    fn drop(&self) -> String {
-        let mut sql = String::new();
-
-        sql.push_str("DROP VIEW ");
-        sql.push_str(&self.view.sql());
-
-        sql
-    }
-
-    fn name(&self, _sql: &str) -> String {
-        self.view.sql()
+    fn object_name(&self) -> Option<String> {
+        Some(self.view.sql())
     }
 }
