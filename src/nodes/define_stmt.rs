@@ -154,6 +154,14 @@ impl Sql for DefineStmt {
 }
 
 impl Diff for DefineStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        Some(format!(
+            "DROP {} IF EXISTS {} CASCADE",
+            self.kind.sql(),
+            self.defnames.sql_ident()
+        ))
+    }
+
     fn object_name(&self) -> Option<String> {
         Some(self.defnames.sql_ident())
     }

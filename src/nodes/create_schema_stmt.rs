@@ -23,7 +23,7 @@ impl Sql for CreateSchemaStmt {
 }
 
 impl Diff for CreateSchemaStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
+    fn alter_stmt(&self, other: &Node) -> Option<String> {
         if let Node::CreateSchemaStmt(other) = other {
             if self.authrole != other.authrole {
                 let mut sql = String::new();
@@ -40,11 +40,11 @@ impl Diff for CreateSchemaStmt {
         None
     }
 
-    fn drop(&self) -> String {
+    fn drop_stmt(&self) -> Option<String> {
         let mut sql = String::new();
         sql.push_str("DROP SCHEMA ");
         sql.push_str(&self.schemaname.clone().unwrap());
-        sql
+        Some(sql)
     }
 
     fn object_name(&self) -> Option<String> {

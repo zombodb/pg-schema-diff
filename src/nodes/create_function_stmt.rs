@@ -65,21 +65,17 @@ impl Sql for CreateFunctionStmt {
 }
 
 impl Diff for CreateFunctionStmt {
-    fn alter(&self, other: &Node) -> Option<String> {
-        if let Node::CreateFunctionStmt(other) = other {
-            let mut alter = String::new();
-            alter.push_str(&other.drop());
-            alter.push('\n');
-            alter.push_str(&self.sql());
-            Some(alter)
-        } else {
-            None
-        }
+    fn alter_stmt(&self, other: &Node) -> Option<String> {
+        let mut alter = String::new();
+        alter.push_str(&self.drop_stmt().unwrap());
+        alter.push_str(";\n");
+        alter.push_str(&other.sql());
+        Some(alter)
     }
 
-    fn drop(&self) -> String {
+    fn drop_stmt(&self) -> Option<String> {
         let mut drop = String::new();
-        drop.push_str("DROP FUNCTION ");
+        drop.push_str("DROP FUNCTION IF EXISTS ");
         drop.push_str(&make_name(&self.funcname).expect("no 'funcname' for CreateFunctionStmt"));
         drop.push('(');
         drop.push_str(
@@ -95,8 +91,8 @@ impl Diff for CreateFunctionStmt {
                 .sql(),
         );
         drop.push(')');
-
-        drop
+        drop.push_str(" CASCADE");
+        Some(drop)
     }
 
     fn object_name(&self) -> Option<String> {

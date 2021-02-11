@@ -4,10 +4,13 @@ use postgres_parser::{parse_query, quote_identifier, Node, SqlStatementScanner};
 use colored::Colorize;
 use std::borrow::Cow;
 
+use std::fmt::Debug;
 use std::hash::{Hash, Hasher};
 use std::panic::{catch_unwind, RefUnwindSafe};
 
+#[derive(Debug)]
 pub struct DiffableStatement {
+    #[allow(dead_code)]
     index: usize,
     sql: String,
     node: Node,
@@ -35,19 +38,19 @@ impl DiffableStatement {
     fn new(index: usize, sql: &str, node: Node, differ: impl Diff + 'static) -> Self {
         DiffableStatement {
             index,
-            sql: sql.into(),
+            sql: sql.trim().into(),
             node,
             differ: Box::new(differ),
         }
     }
 }
 
-pub trait Diff: Sql {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        None
+pub trait Diff: Sql + Debug {
+    fn alter_stmt(&self, _other: &Node) -> Option<String> {
+        unimplemented!("Don't know how to ALTER:\n{:?}", self);
     }
-    fn drop(&self) -> String {
-        unimplemented!()
+    fn drop_stmt(&self) -> Option<String> {
+        None
     }
     fn object_name(&self) -> Option<String> {
         None
@@ -369,9 +372,9 @@ impl SchemaSet {
                     }
                 }
 
-                // it couldn't be parsed.  Just display the underlying parse error
-                Err(_e) => {
-                    // eprintln!("---\nINPUT PARSE ERROR: {:?}\n{}\n/---", e, stmt.sql.trim());
+                // it couldn't be parsed -- panic!
+                Err(e) => {
+                    panic!("INPUT PARSE ERROR: {:?}\n{}\n/---", e, stmt.sql.trim());
                 }
             };
         }
@@ -422,35 +425,43 @@ impl SchemaSet {
         sql
     }
 
-    #[allow(dead_code)]
     pub fn diff(self, that: &SchemaSet) -> String {
         let mut sql = String::new();
 
+        // Find objects in 'self' that don't exist in 'that' so we can DROP them
         for this_node in &self.nodes {
-            eprintln!(
-                "Looking for {}",
-                this_node.differ.identifier(&this_node.sql)
-            );
-            match that.nodes.get(this_node) {
-                // it's in 'that' one too, so we need to diff it
-                Some(that_node) => {
-                    if this_node.node != that_node.node {
-                        eprintln!("   different!");
-                        // eprintln!(
-                        //     "   different! this_node={:#?}\nthat_node={:#?}",
-                        //     this_node.node, that_node.node
-                        // );
+            if !that.nodes.contains(this_node) {
+                match this_node.differ.drop_stmt() {
+                    Some(drop) => {
+                        sql.push_str(&drop);
+                        sql.push_str(";\n");
+                    }
+                    None => {
+                        // it's a statement that we don't know how to drop
+                    }
+                }
+            }
+        }
 
-                        // try to turn this_node into that_node
-                        if let Some(alter) = this_node.differ.alter(&that_node.node) {
+        // find objects that are either in both or only in 'that'
+        for that_node in &that.nodes {
+            // do we have that_node?
+            match self.nodes.get(that_node) {
+                // yes, we do have that node, so lets see if it's different
+                Some(this_node) => {
+                    if this_node.node != that_node.node {
+                        // they are different, so we try to alter it
+                        if let Some(alter) = this_node.differ.alter_stmt(&that_node.node) {
                             sql.push_str(&alter);
+                            sql.push_str(";\n");
                         }
                     }
                 }
 
-                // it's not in the other one, so we use it as is
+                // no, we don't have that node, so we need to just its sql directly
                 None => {
-                    sql.push_str(&this_node.sql);
+                    sql.push_str(&that_node.sql);
+                    sql.push_str(";\n");
                 }
             }
         }

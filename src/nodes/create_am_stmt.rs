@@ -1,6 +1,5 @@
 use crate::schema_set::{Diff, Sql, SqlIdent};
 use postgres_parser::nodes::CreateAmStmt;
-use postgres_parser::Node;
 
 impl Sql for CreateAmStmt {
     fn sql(&self) -> String {
@@ -22,14 +21,6 @@ impl Sql for CreateAmStmt {
 }
 
 impl Diff for CreateAmStmt {
-    fn alter(&self, _other: &Node) -> Option<String> {
-        unimplemented!()
-    }
-
-    fn drop(&self) -> String {
-        unimplemented!()
-    }
-
     fn object_name(&self) -> Option<String> {
         Some(self.amname.sql_ident())
     }
