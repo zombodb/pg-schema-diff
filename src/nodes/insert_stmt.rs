@@ -28,4 +28,8 @@ impl Sql for InsertStmt {
     }
 }
 
-impl Diff for InsertStmt {}
+impl Diff for InsertStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        None
+    }
+}

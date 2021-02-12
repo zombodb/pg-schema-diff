@@ -7,7 +7,6 @@ edition = "2018"
 [dependencies]
 colored = "2.0.0"
 indexmap = "1.6.1"
-#scapegoat = "1.0.0"
-postgres-parser = "0.2.1"
+#postgres-parser = "0.2.1"
+postgres-parser = { path = "../postgres-parser" }
 rand = "0.8.3"
-# postgres-parser = { path = "../postgres-parser" }
