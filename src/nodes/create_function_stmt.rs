@@ -37,6 +37,7 @@ impl Sql for CreateFunctionStmt {
                     }
                     _ => false,
                 })
+                .map(|node| node.clone())
                 .sql_wrap("(", ")"),
         );
 
@@ -52,6 +53,7 @@ impl Sql for CreateFunctionStmt {
                     .filter(|p|
                         matches!(p, Node::FunctionParameter(param) if param.mode == FUNC_PARAM_TABLE)
                     )
+                    .map(|node| node.clone())
                     .sql_wrap("(", ")"),
             );
         } else {
@@ -87,6 +89,14 @@ impl Diff for CreateFunctionStmt {
                 .filter(|p| {
                     matches!(p,
                     Node::FunctionParameter(param) if param.mode != FUNC_PARAM_TABLE)
+                })
+                .map(|node| match node {
+                    Node::FunctionParameter(fp) => {
+                        let mut fp = fp.clone();
+                        fp.defexpr = None;
+                        Node::FunctionParameter(fp)
+                    }
+                    _ => panic!("unexpected function parameter node type"),
                 })
                 .sql(),
         );

@@ -122,7 +122,7 @@ impl SqlList for Option<Vec<Node>> {
     }
 }
 
-impl<'a, I: Iterator<Item = &'a Node>> SqlCollect for I {
+impl<I: Iterator<Item = Node>> SqlCollect for I {
     fn sql_wrap(self, pre: &str, post: &str) -> String {
         format!("{}{}{}", pre, self.sql(), post)
     }
