@@ -62,7 +62,10 @@ pub fn make_name(names: &Option<Vec<Node>>) -> Result<String, PgParserError> {
 
                 match name {
                     crate::Node::Value(value) if value.string.is_some() => {
-                        result.push_str(&value.string.sql_ident());
+                        let ident = value.string.sql_ident();
+                        if &ident != "pg_catalog" {
+                            result.push_str(&value.string.sql_ident());
+                        }
                     }
                     crate::Node::A_Star(a_star) => {
                         result.push_str(&a_star.sql());

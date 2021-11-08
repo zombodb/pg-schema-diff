@@ -22,7 +22,7 @@ impl Sql for DefElem {
                 sql.push_str(&format!("LANGUAGE {}", self.arg.sql()));
             }
             "volatility" => {
-                sql.push_str(&self.arg.sql());
+                sql.push_str(&self.arg.sql().to_uppercase());
             }
             "strict" => {
                 if get_bool_value(&self.arg.as_ref().unwrap()) {
@@ -35,7 +35,7 @@ impl Sql for DefElem {
             "parallel" => sql.push_str(&format!(
                 "PARALLEL{}{}",
                 separator(&self.arg.as_ref().unwrap()),
-                self.arg.sql()
+                self.arg.sql().to_uppercase()
             )),
             "cost" => sql.push_str(&format!("COST {}", self.arg.sql())),
             "rows" => sql.push_str(&format!("ROWS {}", self.arg.sql())),

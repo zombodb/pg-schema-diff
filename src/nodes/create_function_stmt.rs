@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use crate::schema_set::{Diff, Sql, SqlCollect, SqlIdent, SqlList};
 use crate::{make_name, EMPTY_NODE_VEC};
 use postgres_parser::nodes::CreateFunctionStmt;
@@ -60,7 +61,23 @@ impl Sql for CreateFunctionStmt {
             sql.push_str(&self.returnType.sql_prefix(" RETURNS "));
         }
 
-        sql.push_str(&self.options.sql_prefix(" ", " "));
+        let mut orig_options = self.options.clone();
+        if let Some(mut options) = orig_options {
+            options.sort_by(|a, b| match a {
+                Node::DefElem(a_defelem) => {
+                    if let Node::DefElem(b_defelem) = b {
+                        return a_defelem.sql().cmp(&b_defelem.sql());
+                    }
+
+                    Ordering::Equal
+                },
+
+                _ => Ordering::Equal
+            });
+            orig_options = Some(options);
+        }
+
+        sql.push_str(&orig_options.sql_prefix(" ", " "));
 
         sql
     }

@@ -16,7 +16,20 @@ impl Sql for FunctionParameter {
 
         sql.push_str(&self.name.sql_ident_suffix(" "));
         sql.push_str(&self.argType.sql());
-        sql.push_str(&self.defexpr.sql_prefix(" DEFAULT "));
+        if let Some(default) = &self.defexpr {
+            let default_value = default.sql();
+            if default_value == "(('t')::bool)" {
+                sql.push_str(" DEFAULT 'true'");
+            } else if default_value == "(('f')::bool)" {
+                sql.push_str(" DEFAULT 'false'");
+            } else if default_value == "NULL" {
+                sql.push_str(" DEFAULT NULL");
+            } else if default_value.starts_with("'") && default_value.ends_with("'") {
+                sql.push_str(&self.defexpr.sql_prefix(" DEFAULT "));
+            } else {
+                sql.push_str(&format!(" DEFAULT '{}'", default_value));
+            }
+        }
 
         sql
     }
