@@ -459,8 +459,6 @@ impl SchemaSet {
                     if &this_node.node.sql() != &that_node.node.sql() {
                         // they are different, so we try to alter it
                         if let Some(alter) = this_node.differ.alter_stmt(&that_node.node) {
-                            eprintln!("this={}", this_node.node.sql());
-                            eprintln!("that={}", that_node.node.sql());
                             sql.push_str(&alter);
                             sql.push_str(";\n");
                         }
