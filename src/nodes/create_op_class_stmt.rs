@@ -27,4 +27,8 @@ impl Diff for CreateOpClassStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.opclassname.sql_ident())
     }
+
+    fn object_type(&self) -> String {
+        "OP CLASS".into()
+    }
 }

@@ -50,4 +50,8 @@ impl Diff for CreateSchemaStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.schemaname.sql_ident())
     }
+
+    fn object_type(&self) -> String {
+        "SCHEMA".into()
+    }
 }

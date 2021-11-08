@@ -22,4 +22,9 @@ impl Diff for CreateDomainStmt {
     fn object_name(&self) -> Option<String> {
         Some(make_name(&self.domainname).expect("unable to make CreateDomainStmt::domainname"))
     }
+
+    fn object_type(&self) -> String {
+        "DOMAIN".into()
+    }
+
 }

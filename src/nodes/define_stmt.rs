@@ -165,4 +165,8 @@ impl Diff for DefineStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.defnames.sql_ident())
     }
+
+    fn object_type(&self) -> String {
+        self.kind.sql()
+    }
 }

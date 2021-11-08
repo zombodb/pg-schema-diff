@@ -38,4 +38,8 @@ impl Diff for ViewStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.view.sql())
     }
+
+    fn object_type(&self) -> String {
+        "VIEW".into()
+    }
 }

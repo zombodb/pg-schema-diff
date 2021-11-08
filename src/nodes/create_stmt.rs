@@ -49,4 +49,8 @@ impl Diff for CreateStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.relation.sql())
     }
+
+    fn object_type(&self) -> String {
+        "RELATION".into()
+    }
 }

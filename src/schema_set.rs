@@ -50,7 +50,7 @@ impl DiffableStatement {
 
 pub trait Diff: Sql + Debug {
     fn alter_stmt(&self, _other: &Node) -> Option<String> {
-        unimplemented!("Don't know how to ALTER:\n{:?}", self);
+        unimplemented!("Don't know how to ALTER:\n{}\n{:?}\n{:?}", self.sql(), _other, self);
     }
 
     fn drop_stmt(&self) -> Option<String> {
@@ -61,9 +61,11 @@ pub trait Diff: Sql + Debug {
         None
     }
 
+    fn object_type(&self) -> String { String::new() }
+
     fn identifier<'a>(&self, tree_string: &'a str) -> Cow<'a, str> {
         match self.object_name() {
-            Some(name) => Cow::Owned(name),
+            Some(name) => Cow::Owned(name + &self.object_type()),
             None => Cow::Borrowed(tree_string),
         }
     }

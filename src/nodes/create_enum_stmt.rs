@@ -20,4 +20,8 @@ impl Diff for CreateEnumStmt {
     fn object_name(&self) -> Option<String> {
         Some(self.typeName.sql_ident())
     }
+
+    fn object_type(&self) -> String {
+        "ENUM".into()
+    }
 }

@@ -108,4 +108,8 @@ impl Diff for CreateFunctionStmt {
     fn object_name(&self) -> Option<String> {
         Some(make_name(&self.funcname).expect("unable to make name for CreateFunctionStatement"))
     }
+
+    fn object_type(&self) -> String {
+        "FUNCTION".into()
+    }
 }
