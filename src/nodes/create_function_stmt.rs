@@ -123,7 +123,25 @@ impl Diff for CreateFunctionStmt {
     }
 
     fn object_name(&self) -> Option<String> {
-        Some(make_name(&self.funcname).expect("unable to make name for CreateFunctionStatement"))
+        let mut as_ = String::new();
+        let mut is_c = false;
+        for opt in self.options.iter().flatten() {
+            if let Node::DefElem(defelem) = opt {
+                if defelem.defname.as_ref().unwrap().eq_ignore_ascii_case("as") {
+                    as_ = defelem.sql();
+                    break;
+                } else if defelem.defname.as_ref().unwrap().eq_ignore_ascii_case("language") {
+                    is_c = true;
+                }
+            }
+        }
+
+        let name = make_name(&self.funcname).expect("unable to make name for CreateFunctionStatement");
+        if is_c {
+            Some(name + &as_)
+        } else {
+            Some(name)
+        }
     }
 
     fn object_type(&self) -> String {
