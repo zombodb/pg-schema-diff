@@ -160,7 +160,11 @@ impl Sql for Node {
             Node::CreateFdwStmt(stmt) => stmt.sql(),
             Node::CreateForeignServerStmt(stmt) => stmt.sql(),
             Node::CreateForeignTableStmt(stmt) => stmt.sql(),
-            Node::CreateFunctionStmt(stmt) => stmt.sql(),
+            Node::CreateFunctionStmt(stmt) => {
+                let mut stmt = stmt.clone();
+                stmt.replace = true;
+                stmt.sql()
+            },
             Node::CreateOpClassItem(stmt) => stmt.sql(),
             Node::CreateOpClassStmt(stmt) => stmt.sql(),
             Node::CreatePolicyStmt(stmt) => stmt.sql(),
