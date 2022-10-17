@@ -118,7 +118,6 @@ impl Diff for CreateFunctionStmt {
                 .sql(),
         );
         drop.push(')');
-        drop.push_str(" CASCADE");
         Some(drop)
     }
 
