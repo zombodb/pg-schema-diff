@@ -12,4 +12,8 @@ impl Sql for DoStmt {
     }
 }
 
-impl Diff for DoStmt {}
+impl Diff for DoStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        None
+    }
+}
