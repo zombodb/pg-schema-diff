@@ -50,7 +50,8 @@ impl DiffableStatement {
 
 pub trait Diff: Sql + Debug {
     fn alter_stmt(&self, _other: &Node) -> Option<String> {
-        unimplemented!("Don't know how to ALTER:\n{}\n{:?}\n{:?}", self.sql(), _other, self);
+        println!("/*\nDon't know how to ALTER:\n{}\n{:?}\n{:?}\n*/", self.sql(), _other, self);
+        return None;
     }
 
     fn drop_stmt(&self) -> Option<String> {
@@ -361,8 +362,9 @@ impl SchemaSet {
             Node::VariableSetStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::VariableShowStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::ViewStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::CreateEventTrigStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
 
-            _ => panic!("unknown node: {:?}\n\n{}", node, sql),
+            _ => println!("/*\nunknown node: {:?}\n\n{}\n*/", node, sql),
         };
     }
 
