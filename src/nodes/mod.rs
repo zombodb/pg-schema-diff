@@ -198,7 +198,10 @@ impl Sql for Node {
             Node::InsertStmt(stmt) => stmt.sql(),
             Node::IntoClause(stmt) => stmt.sql(),
             Node::JoinExpr(stmt) => stmt.sql(),
-            Node::List(_) => unreachable!("encountered a List node"),
+            Node::List(_) => {
+                eprintln!("ENCOUNTERED A LIST NODE");
+                "encountered a List node".to_owned()
+            },
             Node::ListenStmt(stmt) => stmt.sql(),
             Node::LockStmt(stmt) => stmt.sql(),
             Node::LockingClause(stmt) => stmt.sql(),
@@ -240,6 +243,7 @@ impl Sql for Node {
             Node::ViewStmt(stmt) => stmt.sql(),
             Node::WindowDef(stmt) => stmt.sql(),
             Node::WithClause(stmt) => stmt.sql(),
+            Node::CreateEventTrigStmt(stmt) => stmt.sql(),
 
             _ => unimplemented!("Node: {:?}", self),
         }
