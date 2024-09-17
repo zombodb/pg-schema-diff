@@ -119,6 +119,7 @@ mod view_check_option;
 mod view_stmt;
 mod window_def;
 mod with_clause;
+mod create_event_trig_stmt;
 
 impl Sql for Node {
     #[track_caller]
