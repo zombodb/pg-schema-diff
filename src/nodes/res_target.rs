@@ -67,7 +67,7 @@ pub fn res_target_update(targets: &Option<Vec<Node>>) -> String {
         .iter()
         .map(|n| match n {
             Node::ResTarget(ref res_target) => res_target,
-            _ => panic!("unexpected node {:?} in update targetList"),
+            unexpected => panic!("unexpected node in update targetList: {unexpected:?}"),
         });
 
     let mut i = 0;

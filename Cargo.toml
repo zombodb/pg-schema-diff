@@ -2,10 +2,10 @@
 name = "pg-schema-diff"
 version = "0.0.1"
 authors = ["ZomboDB, LLC <zombodb@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 colored = "2.0.0"
-indexmap = "1.6.1"
+indexmap = "2.5.0"
 postgres-parser = "*"
 rand = "0.8.3"
