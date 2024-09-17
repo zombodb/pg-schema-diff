@@ -199,8 +199,7 @@ impl Sql for Node {
             Node::IntoClause(stmt) => stmt.sql(),
             Node::JoinExpr(stmt) => stmt.sql(),
             Node::List(_) => {
-                eprintln!("ENCOUNTERED A LIST NODE");
-                "encountered a List node".to_owned()
+                String::new()
             },
             Node::ListenStmt(stmt) => stmt.sql(),
             Node::LockStmt(stmt) => stmt.sql(),
