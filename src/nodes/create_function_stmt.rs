@@ -94,7 +94,14 @@ impl Diff for CreateFunctionStmt {
 
     fn drop_stmt(&self) -> Option<String> {
         let mut drop = String::new();
-        drop.push_str("DROP FUNCTION IF EXISTS ");
+
+        drop.push_str("DROP ");
+        if self.is_procedure {
+            drop.push_str("PROCEDURE ");
+        } else {
+            drop.push_str("FUNCTION ");
+        }
+        drop.push_str("IF EXISTS ");
         drop.push_str(&make_name(&self.funcname).expect("no 'funcname' for CreateFunctionStmt"));
         drop.push('(');
         drop.push_str(
