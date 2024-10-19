@@ -14,4 +14,8 @@ impl Sql for AlterFunctionStmt {
     }
 }
 
-impl Diff for AlterFunctionStmt {}
+impl Diff for AlterFunctionStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        None
+    }
+}
