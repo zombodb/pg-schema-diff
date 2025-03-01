@@ -17,6 +17,10 @@ impl Sql for CreateEnumStmt {
 }
 
 impl Diff for CreateEnumStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        Some(format!("DROP TYPE {}", self.sql()))
+    }
+
     fn object_name(&self) -> Option<String> {
         Some(self.typeName.sql_ident())
     }
