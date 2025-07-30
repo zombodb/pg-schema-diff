@@ -278,6 +278,7 @@ impl Len for Option<Vec<Node>> {
     }
 }
 
+#[derive(Debug)]
 pub struct SchemaSet {
     nodes: indexmap::IndexSet<DiffableStatement>,
 }

@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use crate::schema_set::{Diff, Len, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::DefineStmt;
 use postgres_parser::sys::ObjectType;
@@ -168,5 +169,21 @@ impl Diff for DefineStmt {
 
     fn object_type(&self) -> String {
         self.kind.sql()
+    }
+
+    fn identifier<'a>(&self, tree_string: &'a str) -> Cow<'a, str> {
+        match self.kind {
+            ObjectType::OBJECT_TYPE => {
+                let mut sql = self.sql();
+                if self.definition.is_none() || self.definition.as_ref().unwrap().is_empty() {
+                    sql += " (shell type)";
+                }
+                Cow::Owned(sql)
+            },
+            _ => match self.object_name() {
+                Some(name) => Cow::Owned(name + &self.object_type()),
+                None => Cow::Borrowed(tree_string),
+            }
+        }
     }
 }
