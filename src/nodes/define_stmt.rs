@@ -1,8 +1,9 @@
-use std::borrow::Cow;
 use crate::schema_set::{Diff, Len, Sql, SqlIdent, SqlList};
 use postgres_parser::nodes::DefineStmt;
 use postgres_parser::sys::ObjectType;
 use postgres_parser::Node;
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 impl Sql for DefineStmt {
     fn sql(&self) -> String {
@@ -155,6 +156,96 @@ impl Sql for DefineStmt {
 }
 
 impl Diff for DefineStmt {
+    fn alter_stmt(&self, other: &Node) -> Option<String> {
+        if matches!(self.kind, ObjectType::OBJECT_OPERATOR) {
+            let my_defelems = self
+                .definition
+                .as_ref()
+                .unwrap()
+                .into_iter()
+                .filter_map(|node| {
+                    if let Node::DefElem(defelem) = node {
+                        let name = defelem.defname.as_ref().unwrap();
+                        Some((name.as_str(), defelem))
+                    } else {
+                        None
+                    }
+                })
+                .collect::<HashMap<_, _>>();
+            if let Node::DefineStmt(other) = other {
+                let other_defelms = other
+                    .definition
+                    .as_ref()
+                    .unwrap()
+                    .into_iter()
+                    .filter_map(|node| {
+                        if let Node::DefElem(defelem) = node {
+                            let name = defelem.defname.as_ref().unwrap();
+                            Some((name.as_str(), defelem))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<HashMap<_, _>>();
+
+                let my_lefttype = my_defelems
+                    .get("leftarg")
+                    .expect("OPERATOR should have a LEFTARG");
+                let my_righttype = my_defelems
+                    .get("rightarg")
+                    .expect("OPERATOR should have a RIGHTARG");
+
+                let args = format!("({}, {})", my_lefttype.sql(), my_righttype.sql());
+
+                let mut sql = String::new();
+
+                match (my_defelems.get("restrict"), other_defelms.get("restrict")) {
+                    (Some(mine), Some(theirs)) if mine != theirs => {
+                        sql.push_str(&format!(
+                            "ALTER OPERATOR {}{args} SET (RESTRICT = {});\n",
+                            self.defnames.sql_ident(),
+                            theirs.sql()
+                        ));
+                    }
+                    (Some(_), None) => {
+                        sql.push_str(&format!(
+                            "ALTER OPERATOR {}{args} SET (RESTRICT = NONE);\n",
+                            self.defnames.sql_ident()
+                        ));
+                    }
+                    _ => {}
+                }
+
+                match (my_defelems.get("join"), other_defelms.get("join")) {
+                    (Some(mine), Some(theirs)) if mine != theirs => {
+                        sql.push_str(&format!(
+                            "ALTER OPERATOR {}{args} SET (JOIN = {});\n",
+                            self.defnames.sql_ident(),
+                            theirs.sql()
+                        ));
+                    }
+                    (Some(_), None) => {
+                        sql.push_str(&format!(
+                            "ALTER OPERATOR {}{args} SET (JOIN = NONE);\n",
+                            self.defnames.sql_ident()
+                        ));
+                    }
+                    _ => {}
+                }
+
+                let sql = sql.trim();
+                return if sql.is_empty() {
+                    None
+                } else {
+                    Some(sql.trim_end_matches(';').to_string())
+                };
+            }
+            Diff::alter_stmt(self, other)
+        } else {
+            Diff::alter_stmt(self, other)
+        }
+    }
+
     fn drop_stmt(&self) -> Option<String> {
         Some(format!(
             "DROP {} IF EXISTS {}",
@@ -179,11 +270,11 @@ impl Diff for DefineStmt {
                     sql += " (shell type)";
                 }
                 Cow::Owned(sql)
-            },
+            }
             _ => match self.object_name() {
                 Some(name) => Cow::Owned(name + &self.object_type()),
                 None => Cow::Borrowed(tree_string),
-            }
+            },
         }
     }
 }
