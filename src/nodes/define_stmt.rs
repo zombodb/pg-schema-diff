@@ -271,6 +271,7 @@ impl Diff for DefineStmt {
                 }
                 Cow::Owned(sql)
             }
+            ObjectType::OBJECT_OPERATOR => Cow::Owned(self.sql()),
             _ => match self.object_name() {
                 Some(name) => Cow::Owned(name + &self.object_type()),
                 None => Cow::Borrowed(tree_string),
