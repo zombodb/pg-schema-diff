@@ -247,11 +247,31 @@ impl Diff for DefineStmt {
     }
 
     fn drop_stmt(&self) -> Option<String> {
-        Some(format!(
-            "DROP {} IF EXISTS {}",
-            self.kind.sql(),
-            self.defnames.sql_ident()
-        ))
+        match self.kind {
+            ObjectType::OBJECT_OPERATOR => {
+                let Some(Node::DefElem(leftarg)) = self.definition.as_ref().unwrap().get(1) else {
+                    panic!("bad operator definition")
+                };
+                let Some(Node::DefElem(rightarg)) = self.definition.as_ref().unwrap().get(2) else {
+                    panic!("bad operator definition")
+                };
+
+                let sql = format!(
+                    "DROP OPERATOR IF EXISTS {}({}, {})",
+                    self.defnames.sql_ident(),
+                    leftarg.arg.as_ref().unwrap().sql(),
+                    rightarg.arg.as_ref().unwrap().sql()
+                );
+
+                Some(sql)
+            }
+
+            _ => Some(format!(
+                "DROP {} IF EXISTS {}",
+                self.kind.sql(),
+                self.defnames.sql_ident()
+            )),
+        }
     }
 
     fn object_name(&self) -> Option<String> {

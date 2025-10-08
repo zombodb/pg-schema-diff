@@ -50,7 +50,12 @@ impl DiffableStatement {
 
 pub trait Diff: Sql + Debug {
     fn alter_stmt(&self, _other: &Node) -> Option<String> {
-        println!("/*\nDon't know how to ALTER:\n{}\n{:?}\n{:?}\n*/", self.sql(), _other, self);
+        println!(
+            "/*\nDon't know how to ALTER:\n{}\n{:?}\n{:?}\n*/",
+            self.sql(),
+            _other,
+            self
+        );
         return None;
     }
 
@@ -62,7 +67,9 @@ pub trait Diff: Sql + Debug {
         None
     }
 
-    fn object_type(&self) -> String { String::new() }
+    fn object_type(&self) -> String {
+        String::new()
+    }
 
     fn identifier<'a>(&self, tree_string: &'a str) -> Cow<'a, str> {
         match self.object_name() {
@@ -313,6 +320,7 @@ impl SchemaSet {
             Node::AlterObjectSchemaStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::AlterOwnerStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::AlterTableStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
+            Node::AlterTypeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::ClusterStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CommentStmt(stmt) => push(&mut self.nodes, sql, node, stmt),
             Node::CompositeTypeStmt(stmt) => push(&mut self.nodes, sql, node, stmt),

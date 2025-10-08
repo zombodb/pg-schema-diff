@@ -15,6 +15,7 @@ mod alter_object_schema_stmt;
 mod alter_owner_stmt;
 mod alter_table_cmd;
 mod alter_table_stmt;
+mod alter_type_stmt;
 mod bool_expr;
 mod boolean_test;
 mod case_expr;
@@ -36,6 +37,7 @@ mod create_cast_stmt;
 mod create_conversion_stmt;
 mod create_domain_stmt;
 mod create_enum_stmt;
+mod create_event_trig_stmt;
 mod create_fdw_stmt;
 mod create_foreign_server_stmt;
 mod create_foreign_table_stmt;
@@ -119,7 +121,6 @@ mod view_check_option;
 mod view_stmt;
 mod window_def;
 mod with_clause;
-mod create_event_trig_stmt;
 
 impl Sql for Node {
     #[track_caller]
@@ -165,7 +166,7 @@ impl Sql for Node {
                 let mut stmt = stmt.clone();
                 stmt.replace = true;
                 stmt.sql()
-            },
+            }
             Node::CreateOpClassItem(stmt) => stmt.sql(),
             Node::CreateOpClassStmt(stmt) => stmt.sql(),
             Node::CreatePolicyStmt(stmt) => stmt.sql(),
@@ -198,9 +199,7 @@ impl Sql for Node {
             Node::InsertStmt(stmt) => stmt.sql(),
             Node::IntoClause(stmt) => stmt.sql(),
             Node::JoinExpr(stmt) => stmt.sql(),
-            Node::List(_) => {
-                String::new()
-            },
+            Node::List(_) => String::new(),
             Node::ListenStmt(stmt) => stmt.sql(),
             Node::LockStmt(stmt) => stmt.sql(),
             Node::LockingClause(stmt) => stmt.sql(),
