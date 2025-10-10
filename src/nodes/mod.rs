@@ -140,6 +140,7 @@ impl Sql for Node {
             Node::AlterOwnerStmt(stmt) => stmt.sql(),
             Node::AlterTableCmd(stmt) => stmt.sql(),
             Node::AlterTableStmt(stmt) => stmt.sql(),
+            Node::AlterTypeStmt(stmt) => stmt.sql(),
             Node::BoolExpr(stmt) => stmt.sql(),
             Node::BooleanTest(stmt) => stmt.sql(),
             Node::CaseExpr(stmt) => stmt.sql(),
