@@ -240,10 +240,12 @@ impl Diff for DefineStmt {
                     Some(sql.trim_end_matches(';').to_string())
                 };
             }
-            Diff::alter_stmt(self, other)
-        } else {
-            Diff::alter_stmt(self, other)
         }
+        // For non-OPERATOR types (e.g., AGGREGATE, COLLATION, etc.) or when other is not a DefineStmt,
+        // we don't know how to generate ALTER statements, so return None (same as trait default).
+        // Note: We can't call Diff::alter_stmt(self, other) here because it would resolve to
+        // DefineStmt::alter_stmt again, causing infinite recursion.
+        None
     }
 
     fn drop_stmt(&self) -> Option<String> {
