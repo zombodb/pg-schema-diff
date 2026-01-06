@@ -18,9 +18,11 @@ impl Sql for FunctionParameter {
         sql.push_str(&self.argType.sql());
         if let Some(default) = &self.defexpr {
             let default_value = default.sql();
-            if default_value == "(('t')::bool)" {
+            if default_value == "(('t')::bool)" || default_value == "(('t')::pg_catalog.bool)" {
                 sql.push_str(" DEFAULT 'true'");
-            } else if default_value == "(('f')::bool)" {
+            } else if default_value == "(('f')::bool)"
+                || default_value == "(('f')::pg_catalog.bool)"
+            {
                 sql.push_str(" DEFAULT 'false'");
             } else if default_value == "NULL" {
                 sql.push_str(" DEFAULT NULL");
