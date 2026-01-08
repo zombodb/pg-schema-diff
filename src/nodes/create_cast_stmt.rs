@@ -28,4 +28,12 @@ impl Sql for CreateCastStmt {
     }
 }
 
-impl Diff for CreateCastStmt {}
+impl Diff for CreateCastStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        Some(format!(
+            "DROP CAST IF EXISTS ({} AS {})",
+            self.sourcetype.sql(),
+            self.targettype.sql()
+        ))
+    }
+}
