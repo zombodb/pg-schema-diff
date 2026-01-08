@@ -18,4 +18,8 @@ impl Sql for AlterTypeStmt {
     }
 }
 
-impl Diff for AlterTypeStmt {}
+impl Diff for AlterTypeStmt {
+    fn drop_stmt(&self) -> Option<String> {
+        None
+    }
+}
