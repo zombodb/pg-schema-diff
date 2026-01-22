@@ -1,3 +1,6 @@
+// Copyright 2020-2026 Eric B. Ridge <eebbrr@gmail.com>. All rights reserved. Use
+// of this source code is governed by the Postgres license that can be found in
+// the LICENSE file.
 use std::cmp::Ordering;
 use crate::schema_set::{Diff, Sql, SqlCollect, SqlIdent, SqlList};
 use crate::{make_name, EMPTY_NODE_VEC};

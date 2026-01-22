@@ -1,0 +1,28 @@
+excludes:
+  - \.gitignore
+  - .*lock
+  - \.git/.*
+  - \.licensure\.yml
+  - README.*
+  - LICENSE.*
+  - .*\.(md|rst|txt)
+
+licenses:
+  - files: rs
+    ident: Postgres
+    authors:
+      - name: Eric B. Ridge
+        email: eebbrr@gmail.com
+    template: |
+      Copyright 2020-[year] [name of author]. All rights reserved. Use of
+      this source code is governed by the [ident] license that can be
+      found in the LICENSE file.
+
+comments:
+  - extension: rs
+    columns: 80
+    commenter:
+      type: line
+      comment_char: "//"
+      trailing_lines: 0
+

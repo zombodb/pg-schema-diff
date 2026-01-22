@@ -1,8 +1,9 @@
 [package]
 name = "pg-schema-diff"
 version = "0.0.1"
-authors = ["ZomboDB, LLC <zombodb@gmail.com>"]
+authors = ["Eric B. Ridge <eebbrr@gmail.com>"]
 edition = "2021"
+license = "LICENSE"
 
 [dependencies]
 colored = "2.0.0"
